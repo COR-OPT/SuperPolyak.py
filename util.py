@@ -39,39 +39,27 @@ def build_bundle_naive(f: Callable[[np.ndarray], np.number], gradf: Callable[[np
     # Exit early if solution escaped ball.
     if np.linalg.norm(y - y0) > tau * gap:
         return y0, 1
-    # # Best solution and function value found so far.
-    # y_best = y[:]
+    # Best solution and function value found so far.
     y_best = y[:]
-    # f_best = resid[1]
     f_best = resid[0]
     for bundle_idx in range(1, max_elts):
         bmtrx[bundle_idx, :] = gradf(y)
         # Invariant: resid[bundle_idx - 1] = f(y) - min_f.
         fvals[bundle_idx] = resid[bundle_idx-1] + bmtrx[bundle_idx, :] @ (y0 - y)
-        # lsqr!(
-        #   dy,
-        #   At',
-        #   view(fvals, 1:bundle_idx),
-        #   maxiter = bundle_idx,
-        #   atol = max(Δ, 1e-15),
-        #   btol = max(Δ, 1e-15),
-        #   conlim = 0.0,
-        # )
         dy, _, _, _ = linalg.lstsq(
             bmtrx[0:(bundle_idx + 1), :],
             fvals[0:(bundle_idx + 1)],
             rcond=None)
         # Update point and function gap.
         y = y0 - dy
-        # resid[bundle_idx] = f(y) - min_f
         resid[bundle_idx] = f(y) - min_f
-        # # Terminate early if new point escaped ball around y₀.
+        # Terminate early if new point escaped ball around y₀.
         if (np.linalg.norm(dy) > tau * gap):
             return y_best, bundle_idx
-        # # Terminate early if function value decreased significantly.
+        # Terminate early if function value decreased significantly.
         if (gap < 0.5) and (resid[bundle_idx] < gap ** (1 + eta_est)):
             return y, bundle_idx
-        # # Otherwise, update best solution so far.
+        # Otherwise, update best solution so far.
         if (resid[bundle_idx] < f_best):
             y_best = y
             f_best = resid[bundle_idx]
