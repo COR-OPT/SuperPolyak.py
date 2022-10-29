@@ -68,7 +68,7 @@ def build_bundle_naive(f: Callable[[np.ndarray], np.number], gradf: Callable[[np
 
 
 @torch.no_grad()
-def build_bundle_naive_torch(closure, x: torch.tensor, tau: float, min_f: float, eta_est: float, max_elts: Optional[int]):
+def build_bundle_naive_torch(closure, x: torch.Tensor, tau: float, min_f: float, eta_est: float, max_elts: Optional[int]):
     """Build a Polyak bundle by solving every linear system naively.
 
     Parameters
