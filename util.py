@@ -33,7 +33,7 @@ def build_bundle_naive(f: Callable[[np.ndarray], np.number], gradf: Callable[[np
     bmtrx[0, :] = gradf(y)
     fvals[0] = f(y) - min_f + bmtrx[0, :] @ (y0 - y)
     # Below, we slice bmtrx from 0:1 to force NumPy to interpret it as row vector.
-    y = y0 - linalg.lstsq(bmtrx[0:1, :], [fvals[0]])
+    y = y0 - linalg.lstsq(bmtrx[0:1, :], [fvals[0]])[0]
     resid[0] = f(y) - min_f
     gap = f(y0) - min_f
     # Exit early if solution escaped ball.
