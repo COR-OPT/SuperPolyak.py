@@ -108,7 +108,7 @@ def build_bundle_naive_torch(closure, x: torch.tensor, tau: float, min_f: float,
     resid[0] = fy - min_f
     # Exit early if solution escaped ball.
     if np.linalg.norm(x.numpy() - y0) > tau * gap:
-        return y0, 1
+        return torch.from_numpy(y0), 1
     # Best solution and function value found so far.
     y_best = x.detach().clone().requires_grad_(False)
     f_best = resid[0]
