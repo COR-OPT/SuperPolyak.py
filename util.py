@@ -1,11 +1,31 @@
-import numpy as np
-import numpy.linalg as linalg
-
-import torch
+from enum import Enum
 from typing import Callable, Optional
 
-def build_bundle_naive(f: Callable[[np.ndarray], np.number], gradf: Callable[[np.ndarray], np.ndarray], y0: np.ndarray, tau: float, min_f: float, eta_est: float, max_elts: Optional[int]):
-    """Build a Polyak bundle by solving every linear system naively.
+import numpy as np
+import numpy.linalg as linalg
+from scipy.sparse.linalg import lsmr
+
+import torch
+
+
+class BundleLinearSystemSolver(Enum):
+    """Contains the available linear system solvers for PolyakBundle."""
+
+    NAIVE = 1
+    LSMR = 2
+
+
+def build_bundle(
+    f: Callable[[np.ndarray], np.number],
+    gradf: Callable[[np.ndarray], np.ndarray],
+    y0: np.ndarray,
+    tau: float,
+    min_f: float,
+    eta_est: float,
+    max_elts: Optional[int],
+    linsys_solver: BundleLinearSystemSolver = BundleLinearSystemSolver.NAIVE,
+):
+    """Build a Polyak bundle given a loss function and an initial point.
 
     Parameters
     ----------
@@ -21,6 +41,8 @@ def build_bundle_naive(f: Callable[[np.ndarray], np.number], gradf: Callable[[np
         An estimate of the b-regularity exponent.
     max_elts: int, optional
         The maximal number of elements in the bundle.
+    linsys_solver: BundleLinearSystemSolver (default: NAIVE)
+        The linear system solver to use.
     """
     d = len(y0)
     y = y0[:]
@@ -30,7 +52,7 @@ def build_bundle_naive(f: Callable[[np.ndarray], np.number], gradf: Callable[[np
     fvals = np.zeros(max_elts)
     resid = np.zeros(max_elts)
     # Matrix of bundle elements, stored in row-major format.
-    bmtrx = np.zeros((max_elts, d), order='C')
+    bmtrx = np.zeros((max_elts, d), order="C")
     bmtrx[0, :] = gradf(y)
     fvals[0] = f(y) - min_f + bmtrx[0, :] @ (y0 - y)
     # Below, we slice bmtrx from 0:1 to force NumPy to interpret it as row vector.
@@ -43,51 +65,73 @@ def build_bundle_naive(f: Callable[[np.ndarray], np.number], gradf: Callable[[np
     # Best solution and function value found so far.
     y_best = y[:]
     f_best = resid[0]
+    dy = y - y0
     for bundle_idx in range(1, max_elts):
         bmtrx[bundle_idx, :] = gradf(y)
         # Invariant: resid[bundle_idx - 1] = f(y) - min_f.
-        fvals[bundle_idx] = resid[bundle_idx-1] + bmtrx[bundle_idx, :] @ (y0 - y)
-        dy, _, _, _ = linalg.lstsq(
-            bmtrx[0:(bundle_idx + 1), :],
-            fvals[0:(bundle_idx + 1)],
-            rcond=None)
+        fvals[bundle_idx] = resid[bundle_idx - 1] + bmtrx[bundle_idx, :] @ (y0 - y)
+        if linsys_solver is BundleLinearSystemSolver.NAIVE:
+            dy = linalg.lstsq(
+                bmtrx[0 : (bundle_idx + 1), :], fvals[0 : (bundle_idx + 1)], rcond=None
+            )[0]
+        elif linsys_solver is BundleLinearSystemSolver.LSMR:
+            dy, istop, itn = lsmr(
+                bmtrx[0 : (bundle_idx + 1), :],
+                fvals[0 : (bundle_idx + 1)],
+                atol=max(1e-15, gap),
+                btol=max(1e-15, gap),
+                conlim=0.0,
+                x0=dy,
+            )[:3]
+            # TODO: Warn according to status in `istop`.
+            # TODO: Keep track of the number of iterations `itn`.
+        else:
+            raise ValueError(f"Unrecognized linear system solver {linsys_solver}!")
         # Update point and function gap.
         y = y0 - dy
         resid[bundle_idx] = f(y) - min_f
         # Terminate early if new point escaped ball around y₀.
-        if (np.linalg.norm(dy) > tau * gap):
+        if np.linalg.norm(dy) > tau * gap:
             return y_best, bundle_idx
         # Terminate early if function value decreased significantly.
         if (gap < 0.5) and (resid[bundle_idx] < gap ** (1 + eta_est)):
             return y, bundle_idx
         # Otherwise, update best solution so far.
-        if (resid[bundle_idx] < f_best):
+        if resid[bundle_idx] < f_best:
             y_best = y
             f_best = resid[bundle_idx]
-    return y_best, d
+    return y_best, max_elts
 
 
 @torch.no_grad()
-def build_bundle_naive_torch(closure, x: torch.Tensor, tau: float, min_f: float, eta_est: float, max_elts: Optional[int]):
-    """Build a Polyak bundle by solving every linear system naively.
+def build_bundle_torch(
+    closure: Callable,
+    x: torch.Tensor,
+    tau: float,
+    min_f: float,
+    eta_est: float,
+    max_elts: Optional[int],
+    linsys_solver: BundleLinearSystemSolver = BundleLinearSystemSolver.NAIVE,
+):
+    """Build a Polyak bundle given a loss function and an initial point.
 
     Parameters
     ----------
-    f : Callable[[np.ndarray], np.number]
-        A callable implementing the loss function.
-    gradf : Callable[[np.ndarray], np.ndarray]
-        A callable implementing the gradient of the loss function.
-    y0 : np.ndarray
-        The center of the bundle.
+    closure: Callable
+        A closure that evaluates the objective function.
+    x : torch.Tensor
+        The center point of the bundle.
     tau : float
         The trust region parameter.
     eta_est : float
         An estimate of the b-regularity exponent.
     max_elts: int, optional
         The maximal number of elements in the bundle.
+    linsys_solver: BundleLinearSystemSolver (default: NAIVE)
+        The linear system solver to use.
     """
     d = len(x)
-    y0 = x.detach().clone().requires_grad_(False).numpy()
+    y0 = x.detach().clone().numpy()
     with torch.enable_grad():
         fy0 = closure().item()
     gap = fy0 - min_f
@@ -97,7 +141,7 @@ def build_bundle_naive_torch(closure, x: torch.Tensor, tau: float, min_f: float,
     fvals = np.zeros(max_elts)
     resid = np.zeros(max_elts)
     # Matrix of bundle elements, stored in row-major format.
-    bmtrx = np.zeros((max_elts, d))
+    bmtrx = np.zeros((max_elts, d), order="C")
     fvals[0] = fy0 - min_f + bmtrx[0, :] @ (y0 - y0)
     bmtrx[0, :] = x.grad.numpy()
     # Below, we slice bmtrx from 0:1 to force NumPy to interpret it as row vector.
@@ -110,29 +154,42 @@ def build_bundle_naive_torch(closure, x: torch.Tensor, tau: float, min_f: float,
     if np.linalg.norm(x.numpy() - y0) > tau * gap:
         return torch.from_numpy(y0), 1
     # Best solution and function value found so far.
-    y_best = x.detach().clone().requires_grad_(False)
+    y_best = x.detach().clone().numpy()
     f_best = resid[0]
     for bundle_idx in range(1, max_elts):
         bmtrx[bundle_idx, :] = x.grad.numpy()
         # Invariant: resid[bundle_idx - 1] = f(y) - min_f.
-        fvals[bundle_idx] = resid[bundle_idx-1] + bmtrx[bundle_idx, :] @ (y0 - x.numpy())
-        dy, _, _, _ = np.linalg.lstsq(
-            bmtrx[0:(bundle_idx + 1), :],
-            fvals[0:(bundle_idx + 1)],
-            rcond=None)
+        fvals[bundle_idx] = resid[bundle_idx - 1] + bmtrx[bundle_idx, :] @ (
+            y0 - x.numpy()
+        )
+        if linsys_solver is BundleLinearSystemSolver.NAIVE:
+            dy = np.linalg.lstsq(
+                bmtrx[0 : (bundle_idx + 1), :], fvals[0 : (bundle_idx + 1)], rcond=None
+            )[0]
+        elif linsys_solver is BundleLinearSystemSolver.LSMR:
+            dy, istop, itn = lsmr(
+                bmtrx[0 : (bundle_idx + 1), :],
+                fvals[0 : (bundle_idx + 1)],
+                atol=max(1e-15, gap),
+                btol=max(1e-15, gap),
+                conlim=0.0,
+                x0=dy,
+            )[:3]
+        else:
+            raise ValueError(f"Unrecognized linear system solver {linsys_solver}!")
         # Update point and function gap.
         x.copy_(torch.from_numpy(y0 - dy))
         with torch.enable_grad():
             fy = closure().item()
         resid[bundle_idx] = fy - min_f
         # Terminate early if new point escaped ball around y₀.
-        if (np.linalg.norm(dy) > tau * gap):
+        if np.linalg.norm(dy) > tau * gap:
             return y_best, bundle_idx
         # Terminate early if function value decreased significantly.
         if (gap < 0.5) and (resid[bundle_idx] < gap ** (1 + eta_est)):
             return x, bundle_idx
         # Otherwise, update best solution so far.
-        if (resid[bundle_idx] < f_best):
-            y_best = x.detach().clone().requires_grad_(False)
+        if resid[bundle_idx] < f_best:
+            y_best = x.detach().clone().numpy()
             f_best = resid[bundle_idx]
-    return y_best, d
+    return y_best, max_elts
