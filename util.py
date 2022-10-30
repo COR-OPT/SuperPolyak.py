@@ -384,7 +384,7 @@ def build_bundle_torch_param_groups(
         # Terminate early if function value decreased significantly.
         if (gap < 0.5) and (resid[bundle_idx] < gap ** (1 + eta_est)):
             torch.nn.utils.vector_to_parameters(torch.from_numpy(y_best), params)
-            return x, bundle_idx
+            return params, bundle_idx
         # Otherwise, update best solution so far.
         if resid[bundle_idx] < f_best:
             y_best = torch.nn.utils.parameters_to_vector(params).detach().clone().numpy()
