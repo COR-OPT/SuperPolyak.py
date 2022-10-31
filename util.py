@@ -351,6 +351,7 @@ def build_bundle_torch_param_groups(
     # Best solution and function value found so far.
     y_best = torch.nn.utils.parameters_to_vector(params).detach().clone().numpy()
     f_best = resid[0]
+    dy = torch.nn.utils.parameters_to_vector(params).numpy() - y0
     for bundle_idx in range(1, max_elts):
         bmtrx[bundle_idx, :] = _gather_flat_grad(params).numpy()
         # Invariant: resid[bundle_idx - 1] = f(y) - min_f.
@@ -365,8 +366,8 @@ def build_bundle_torch_param_groups(
             dy, istop, itn = lsmr(
                 bmtrx[0 : (bundle_idx + 1), :],
                 fvals[0 : (bundle_idx + 1)],
-                atol=max(1e-15, gap),
-                btol=max(1e-15, gap),
+                atol=max(1e-15, 0.01 * gap),
+                btol=max(1e-15, 0.01 * gap),
                 conlim=0.0,
                 x0=dy,
             )[:3]
