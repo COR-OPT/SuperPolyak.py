@@ -103,10 +103,10 @@ class SuperPolyak(Optimizer):
         # Best solution and function value found so far.
         if fy < fy0:
             y_best = torch.nn.utils.parameters_to_vector(self._params).detach().clone().numpy()
-            f_best = fy
+            f_best = fy - self.min_f
         else:
             y_best = y0
-            f_best = fy0
+            f_best = fy0 - self.min_f
         dy = torch.nn.utils.parameters_to_vector(self._params).numpy() - y0
         for bundle_idx in range(1, self.max_elts):
             bmtrx[bundle_idx, :] = self._gather_flat_grad().numpy()
@@ -140,7 +140,8 @@ class SuperPolyak(Optimizer):
                 return bundle_idx
             # Terminate early if function value decreased significantly.
             if (gap < 0.5) and (resid[bundle_idx] < gap ** (1 + self.eta_est)):
-                torch.nn.utils.vector_to_parameters(torch.from_numpy(y_best), self._params)
+                # torch.nn.utils.vector_to_parameters(torch.from_numpy(y_best), self._params)
+                # print("Early termination due to function value decrease: ", resid[bundle_idx], " gap ", gap)
                 return bundle_idx
             # Otherwise, update best solution so far.
             if resid[bundle_idx] < f_best:
