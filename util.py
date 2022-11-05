@@ -332,10 +332,12 @@ def build_bundle_torch_param_groups(
     # If no value was given for `max_elts`, use ambient dimension.
     if max_elts is None:
         max_elts = len(y0)
-    fvals = np.zeros(max_elts)
-    resid = np.zeros(max_elts)
+    data_type = np.float32 if y0.dtype == np.float32 else np.float64
+    data_type = np.float32
+    fvals = np.zeros(max_elts,dtype=data_type)
+    resid = np.zeros(max_elts,dtype=data_type)
     # Matrix of bundle elements, stored in row-major format.
-    bmtrx = np.zeros((max_elts, d), order="C")
+    bmtrx = np.zeros((max_elts, d), order="C",dtype=data_type)
     fvals[0] = fy0 - min_f + bmtrx[0, :] @ (y0 - y0)
     bmtrx[0, :] = _gather_flat_grad(params).numpy()
     # Below, we slice bmtrx from 0:1 to force NumPy to interpret it as row vector.
@@ -349,8 +351,12 @@ def build_bundle_torch_param_groups(
         torch.nn.utils.vector_to_parameters(torch.from_numpy(y0), params)
         return params, 1
     # Best solution and function value found so far.
-    y_best = torch.nn.utils.parameters_to_vector(params).detach().clone().numpy()
-    f_best = resid[0]
+    if fy < fy0:
+        y_best = torch.nn.utils.parameters_to_vector(params).detach().clone().numpy()
+        f_best = fy
+    else:
+        y_best = y0
+        f_best = fy0
     dy = torch.nn.utils.parameters_to_vector(params).numpy() - y0
     for bundle_idx in range(1, max_elts):
         bmtrx[bundle_idx, :] = _gather_flat_grad(params).numpy()
