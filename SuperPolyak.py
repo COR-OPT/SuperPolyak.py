@@ -11,17 +11,6 @@ import numpy.linalg as linalg
 from scipy.sparse.linalg import lsmr
 
 
-class BundleLinearSystemSolver(Enum):
-    """Contains the available linear system solvers for PolyakBundle.
-
-    NAIVE: The default numpy least-squares solver.
-    LSMR: The SciPy implementation of the LSMR algorithm.
-    """
-
-    NAIVE = 1
-    LSMR = 2
-
-
 class SuperPolyak(Optimizer):
     def __init__(
         self,

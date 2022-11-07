@@ -8,6 +8,12 @@ from scipy.sparse.linalg import lsmr
 import torch
 
 
+def _set_param(param_original, params_new):
+    for p, pdata in zip(param_original, params_new):
+        p.data = pdata.data
+
+def _clone_param(param):
+    return [p.detach().clone(memory_format=torch.contiguous_format) for p in param]
 
 class BundleLinearSystemSolver(Enum):
     """Contains the available linear system solvers for PolyakBundle."""

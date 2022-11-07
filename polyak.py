@@ -91,6 +91,7 @@ class Polyak(Optimizer):
         """
         assert len(self.param_groups) == 1
 
+
         closure = torch.enable_grad()(closure)
 
         state = self.state[self._params[0]]
