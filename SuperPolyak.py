@@ -5,7 +5,7 @@ from torch.nn.utils.convert_parameters import vector_to_parameters
 import numpy as np
 
 from enum import Enum
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Tuple
 
 import numpy.linalg as linalg
 from scipy.sparse.linalg import lsmr
@@ -74,7 +74,7 @@ class SuperPolyak(Optimizer):
         return torch.cat(views, 0).numpy()
 
     @torch.no_grad()
-    def build_bundle_torch_param_groups(self, closure: Callable[..., torch.Tensor]):
+    def build_bundle_torch_param_groups(self, closure: Callable[..., torch.Tensor]) -> int:
         y0 = parameters_to_vector(self._params).detach().clone().numpy()
         d = len(y0)
         with torch.enable_grad():
@@ -160,7 +160,7 @@ class SuperPolyak(Optimizer):
         return self.max_elts
 
     @torch.no_grad()
-    def step(self, closure):
+    def step(self, closure) -> Tuple[float, int]:
         """Perform a single polyak bundle step.
 
         Args:

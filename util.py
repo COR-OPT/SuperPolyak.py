@@ -75,6 +75,20 @@ def _set_param(param_original, params_new):
 def _clone_param(param):
     return [p.detach().clone(memory_format=torch.contiguous_format) for p in param]
 
+def generate_sparse_vector(d: int, k: int) -> torch.Tensor:
+    """Generate a random sparse vector with unit norm.
+
+    Args:
+        d (int): The dimension of the vector.
+        k (int): The number of nonzero elements.
+
+    Returns:
+        torch.Tensor: A float64 tensor.
+    """
+    x = np.zeros(d)
+    x[np.random.choice(range(d), size=k, replace=False)] = np.random.randn(k)
+    return torch.tensor(x / np.linalg.norm(x), dtype=torch.double)
+
 class BundleLinearSystemSolver(Enum):
     """Contains the available linear system solvers for PolyakBundle."""
 
