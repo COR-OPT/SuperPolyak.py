@@ -244,6 +244,9 @@ class LassoProblem:
             self.l1_penalty * self.prox_step,
         )
 
+    def prox(self, x, t):
+        return soft_threshold(x, t * self.l1_penalty)
+
     def loss(self):
         return lambda x: torch.linalg.norm(x - self.proximal_gradient(x))
 
