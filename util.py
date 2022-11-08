@@ -24,8 +24,8 @@ def _tol_reached_msg(oracle_calls: int, loss: float):
     ).format(oracle_calls, loss)
 
 
-def superpolyak_coupled_with_fallback(closure_superpolyak: Callable,
-                                      closure_fallback: Callable,
+def superpolyak_coupled_with_fallback(superpolyak_closure: Callable,
+                                      fallback_closure: Callable,
                                       superpolyak_optimizer: SuperPolyak.SuperPolyak,
                                       fallback_optimizer: Optimizer,
                                       max_inner_iter: int,
@@ -34,7 +34,7 @@ def superpolyak_coupled_with_fallback(closure_superpolyak: Callable,
                                       tol: float = 1e-16,
                                       verbose: bool = False):
 
-    loss = closure_superpolyak().item()
+    loss = superpolyak_closure().item()
     loss_list = [loss]
     oracle_calls = [0]
     for k_outer in range(max_outer_iter):
@@ -43,7 +43,7 @@ def superpolyak_coupled_with_fallback(closure_superpolyak: Callable,
             if verbose:
                 print(_tol_reached_msg(oracle_calls[-1], loss))
             return oracle_calls, loss_list
-        loss_superpolyak_step, bundle_idx = superpolyak_optimizer.step(closure_superpolyak)
+        loss_superpolyak_step, bundle_idx = superpolyak_optimizer.step(superpolyak_closure)
         loss_list.append(loss_superpolyak_step)
         oracle_calls.append(oracle_calls[-1] + bundle_idx)
         if loss_superpolyak_step < mult_factor * loss:
@@ -56,11 +56,11 @@ def superpolyak_coupled_with_fallback(closure_superpolyak: Callable,
             param_best = _clone_param(superpolyak_optimizer._params)
             loss_best = min([loss, loss_superpolyak_step])
             for k_inner in range(max_inner_iter):
-                fallback_optimizer.step(closure_fallback)
-                fallback_loss = closure_superpolyak().item()
+                fallback_optimizer.step(fallback_closure)
+                fallback_loss = superpolyak_closure().item()
                 if fallback_loss < loss_best:
                     _set_param(superpolyak_optimizer._params, param_best)
-                    loss_best = closure_superpolyak().item()
+                    loss_best = superpolyak_closure().item()
                 oracle_calls.append(oracle_calls[-1] + 1)
                 loss_list.append(loss_best)
                 if fallback_loss < mult_factor * loss:
