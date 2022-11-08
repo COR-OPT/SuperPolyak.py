@@ -53,14 +53,10 @@ def superpolyak_coupled_with_fallback(superpolyak_closure: Callable,
                       ", Loss = ", loss_superpolyak_step,
                       ", Bundle index = ", bundle_idx)
         else:
-            param_best = _clone_param(superpolyak_optimizer._params)
             loss_best = min([loss, loss_superpolyak_step])
             for k_inner in range(max_inner_iter):
                 fallback_optimizer.step(fallback_closure)
                 fallback_loss = superpolyak_closure().item()
-                if fallback_loss < loss_best:
-                    _set_param(superpolyak_optimizer._params, param_best)
-                    loss_best = superpolyak_closure().item()
                 oracle_calls.append(oracle_calls[-1] + 1)
                 loss_list.append(loss_best)
                 if fallback_loss < mult_factor * loss:
@@ -73,7 +69,6 @@ def superpolyak_coupled_with_fallback(superpolyak_closure: Callable,
                 print("Fallback step!",
                       "Current oracle evaluations: ", oracle_calls[-1],
                       ", Loss = ", loss_best)
-            _set_param(superpolyak_optimizer._params, param_best)
     return oracle_calls, loss_list
 
 
