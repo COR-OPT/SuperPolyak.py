@@ -264,7 +264,6 @@ def phase(v):
 def fnorm(v, nrm):
     return torch.zeros(v.size()) if nrm <= 1e-15 else (v / nrm)
 
-
 # here is the translation
 
 def soft_threshold(x, τ):
