@@ -68,14 +68,14 @@ class CompressedSensingProblem:
     def proj_range(self, x):
         return (
             x
-            + torch.linalg.solve(
+            + torch.linalg.lstsq(
                 self.F[0],
                 self.y - self.A @ (x),
             )[0]
         )
 
     def dist_range(self, x):
-        return torch.norm(torch.linalg.solve(self.F[0], self.y - self.A @ (x))[0])
+        return torch.norm(torch.linalg.lstsq(self.F[0], self.y - self.A @ (x))[0])
 
     def loss(self):
         def f(z):
@@ -93,8 +93,8 @@ class CompressedSensingProblem:
 # The phase retrieval problem
 class PhaseRetrievalProblem:
     def __init__(self, m, d):
-        self.A = torch.randn(m, d)
-        self.x = normalize(torch.randn(d), dim=-1)
+        self.A = torch.randn(m, d, dtype=torch.cdouble)
+        self.x = normalize(torch.randn(d,dtype=torch.cdouble), dim=-1)
         self.y = torch.abs(self.A @ self.x)
 
     def loss(self):
@@ -115,10 +115,10 @@ class PhaseRetrievalProblem:
         F = torch.qr(A)
 
         def f(z):
-            z_comp = z[0:m] + z[m : 2 * m] * 1j
-            return torch.norm(
-                z_comp - A.mm(torch.linalg.solve(z_comp, F[0])[0])
-            ) + torch.norm(z_comp - y * phase(z_comp))
+            z_comp = z[0:m] + z[m:] * 1j
+            return torch.linalg.norm(
+                z_comp - A @(torch.linalg.lstsq(F[0], z_comp)[0])
+            ) + torch.linalg.norm(z_comp - torch.mul(y, phase(z_comp)))
 
         return f
 
@@ -130,7 +130,7 @@ class PhaseRetrievalProblem:
 
         def f(z):
             phased = phase(
-                A.mm(torch.linalg.solve(z[0:m] + z[m : 2 * m] * 1j, F[0])[0])
+                A @(torch.linalg.lstsq(F[0],z[0:m] + z[m :] * 1j)[0])
             )
             return torch.cat([y * phased.real, y * phased.imag])
 
