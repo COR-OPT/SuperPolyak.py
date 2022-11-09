@@ -264,3 +264,44 @@ class LassoProblem:
         T = self.A[:, ~nnz_ind].numpy()
         gamma = 1.0 - np.linalg.norm(T.T @ (S @ np.linalg.inv(S.T @ S)), np.inf)
         return (2 / gamma) * self.noise_stddev * np.sqrt(np.log(d) / m)
+
+
+# Now we add a logistic regression example on random data
+# The loss function is the logistic loss + the l2 norm square penalty on the weights
+# there is no proximal operator
+# the gradient of the loss is the gradient of the logistic loss + the l2 norm square gradient on the weights
+
+class LogisticRegressionProblem:
+    def __init__(self, m, d, noise_stddev=0.1, l2_penalty=0.1):
+        self.A = torch.tensor(
+            np.linalg.qr(np.random.randn(d, m))[0].T, dtype=torch.double
+        )
+        self.x = torch.randn(d, dtype=torch.double)
+        self.y = (self.A @ self.x > 0).double()
+        self.noise_stddev = noise_stddev
+        self.l2_penalty = l2_penalty
+        self.lr = 0.95 / ((np.linalg.norm(self.A, 2) ** 2)/m + l2_penalty)
+
+    # the loss function for logistic regression + l2 norm square penalty on the weights
+    def loss(self):
+        return lambda x: torch.mean(
+            torch.log(1 + torch.exp(-self.y * (self.A @ x)))
+        ) + self.l2_penalty * torch.linalg.norm(x) ** 2
+
+    # a pytorch command to compute the gradient of the loss function
+    def loss_grad(self):
+        return lambda x: torch.autograd.grad(self.loss()(x), x, create_graph=True)[0]
+
+    # a function returning a function that computes the norm of the gradient of the loss function
+    def norm_grad(self):
+        return lambda x: torch.linalg.norm(self.loss_grad()(x))
+
+    def initializer(self, δ):
+        return (
+            self.x
+            + δ * normalize(torch.randn(self.x.size(), dtype=torch.double), dim=-1)
+        ).requires_grad_(True)
+
+
+
+
