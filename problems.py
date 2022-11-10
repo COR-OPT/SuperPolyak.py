@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 from torch.nn.functional import normalize
 import numpy as np
 
@@ -302,6 +303,42 @@ class LogisticRegressionProblem:
             + δ * normalize(torch.randn(self.x.size(), dtype=torch.double), dim=-1)
         ).requires_grad_(True)
 
+
+
+# Now we make a problem class for the "generative phase retrieval" problem
+# The method includes self.net which is a 2 layer neural network with ReLU activation
+# The parameters of the net are fixed. The problem is to recover the input to the net, which is a vector x
+# The loss function is torch.norm(torch.abs(A @ self.net(x)) - self.y, 2) ** 2
+# where self.y = torch.abs(A @ self.net(x)) is the output of the net
+# and A is a random matrix
+
+class GenerativePhaseRetrievalProblem:
+    def __init__(self,latent_dimension=10,d=100,m=40,nb_hidden=100):
+        self.x = torch.randn(latent_dimension, dtype=torch.double)
+        self.A = torch.randn(m, d, dtype=torch.double)
+        self.net = nn.Sequential(nn.Linear(latent_dimension, nb_hidden), nn.ReLU(), nn.Linear(nb_hidden, d))
+        # make sure self.net is type double
+        self.net.double()
+        # make sure the parameters of self.net are not trainable
+        for param in self.net.parameters():
+            param.requires_grad = False
+        self.y = torch.abs(self.A @ self.net(self.x))
+
+
+    def loss(self):
+        return lambda x: torch.linalg.norm(torch.abs(self.A @ self.net(x)) - self.y, 1)
+
+    def loss_grad(self):
+        return lambda x: torch.autograd.grad(self.loss()(x), x, create_graph=True)[0]
+
+    def norm_grad(self):
+        return lambda x: torch.linalg.norm(self.loss_grad()(x))
+
+    def initializer(self, δ):
+        return (
+            self.x
+            + δ * normalize(torch.randn(self.x.size(), dtype=torch.double), dim=-1)
+        ).requires_grad_(True)
 
 
 

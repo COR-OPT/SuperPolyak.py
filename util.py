@@ -32,11 +32,13 @@ def superpolyak_coupled_with_fallback(superpolyak_closure: Callable,
                                       max_outer_iter: int,
                                       mult_factor: float = .5,
                                       tol: float = 1e-16,
-                                      verbose: bool = False):
+                                      verbose: bool = False,
+                                      metric_to_print : Callable = None):
 
     loss = superpolyak_closure().item()
     loss_list = [loss]
     oracle_calls = [0]
+    cloned_param = _clone_param(superpolyak_optimizer._params)
     for k_outer in range(max_outer_iter):
         loss = loss_list[-1]
         if loss < tol:
@@ -48,27 +50,48 @@ def superpolyak_coupled_with_fallback(superpolyak_closure: Callable,
         oracle_calls.append(oracle_calls[-1] + bundle_idx)
         if loss_superpolyak_step < mult_factor * loss:
             if verbose:
-                print("SuperPolyak step accepted!",
+                if metric_to_print == None:
+                    print("SuperPolyak step accepted!",
+                          "Current oracle evaluations: ", oracle_calls[-1],
+                          ", Loss = ", loss_superpolyak_step,
+                          ", Bundle index = ", bundle_idx)
+                else:
+                    print("SuperPolyak step accepted!",
                       "Current oracle evaluations: ", oracle_calls[-1],
                       ", Loss = ", loss_superpolyak_step,
-                      ", Bundle index = ", bundle_idx)
+                      ", Bundle index = ", bundle_idx,
+                      ", Metric = ", metric_to_print())
         else:
-            loss_best = min([loss, loss_superpolyak_step])
+            if loss_superpolyak_step >= loss:
+                _set_param(superpolyak_optimizer._params, cloned_param)
+                fallback_loss = loss
+            else:
+                fallback_loss = loss_superpolyak_step
             for k_inner in range(max_inner_iter):
                 fallback_optimizer.step(fallback_closure)
                 fallback_loss = superpolyak_closure().item()
                 oracle_calls.append(oracle_calls[-1] + 1)
-                loss_list.append(loss_best)
+                loss_list.append(fallback_loss)
                 if fallback_loss < mult_factor * loss:
                     break
                 if fallback_loss < tol:
                     if verbose:
-                        print(_tol_reached_msg(oracle_calls[-1], loss_best))
+                        print(_tol_reached_msg(oracle_calls[-1], fallback_loss))
                     return oracle_calls, loss_list
             if verbose:
-                print("Fallback step!",
-                      "Current oracle evaluations: ", oracle_calls[-1],
-                      ", Loss = ", loss_best)
+                if metric_to_print == None:
+                    print("Fallback step accepted!",
+                          "Current oracle evaluations: ", oracle_calls[-1],
+                          ", Loss = ", fallback_loss)
+                else:
+                    print("Fallback step accepted!",
+                          "Current oracle evaluations: ", oracle_calls[-1],
+                          ", Loss = ", fallback_loss,
+                          ", Metric = ", metric_to_print())
+            if loss == fallback_loss:
+                print("Algorithm is stuck, returning early.")
+                return oracle_calls, loss_list
+        _set_param(cloned_param,superpolyak_optimizer._params)
     return oracle_calls, loss_list
 
 
