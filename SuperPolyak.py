@@ -88,9 +88,7 @@ class SuperPolyak(Optimizer):
         bvect = self._gather_flat_grad()
         # First bundle point is the standard Polyak step.
         vector_to_parameters(
-            torch.from_numpy(
-                y0 - fvals[0] * bvect / (np.linalg.norm(bvect) ** 2)
-            ),
+            torch.from_numpy(y0 - fvals[0] * bvect / (np.linalg.norm(bvect) ** 2)),
             self._params,
         )
         # Initialize Q, R from bvect.
@@ -122,19 +120,15 @@ class SuperPolyak(Optimizer):
             )
             # Update the Q and R factors.
             try:
-                Q, R = sp_linalg.qr_insert(
-                    Q,
-                    R,
-                    bvect,
-                    bundle_idx,
-                    "col"
+                Q, R = sp_linalg.qr_insert(Q, R, bvect, bundle_idx, "col")
+                dy = Q @ (
+                    sp_linalg.solve_triangular(R, fvals[: (bundle_idx + 1)], trans=1)
                 )
-                dy = Q @ (sp_linalg.solve_triangular(R, fvals[:(bundle_idx + 1)], trans=1))
             except LinAlgError:
                 dy = np.linalg.lstsq(
                     np.hstack((Q @ R, bvect[:, np.newaxis])).T,
                     fvals[0 : (bundle_idx + 1)],
-                    rcond=None
+                    rcond=None,
                 )[0]
                 print("Bundle matrix is degenerate - terminating.")
                 if np.linalg.norm(dy) > self.tau * gap:
@@ -161,7 +155,6 @@ class SuperPolyak(Optimizer):
         vector_to_parameters(torch.from_numpy(y_best), self._params)
         return self.max_elts
 
-
     @torch.no_grad()
     def build_bundle(self, closure: Callable[..., torch.Tensor]) -> int:
         y0 = parameters_to_vector(self._params).detach().clone().numpy()
@@ -169,8 +162,7 @@ class SuperPolyak(Optimizer):
         with torch.enable_grad():
             fy0 = closure().item()
         gap = fy0 - self.min_f
-        data_type = np.float32 if y0.dtype == np.float32 else np.float64
-        data_type = np.float32
+        data_type = y0.dtype
         fvals = np.zeros(self.max_elts, dtype=data_type)
         resid = np.zeros(self.max_elts, dtype=data_type)
         # Matrix of bundle elements, stored in row-major format.
