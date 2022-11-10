@@ -5,13 +5,13 @@ import numpy as np
 
 # Modified from https://github.com/pytorch/pytorch/blob/master/torch/optim/lbfgs.py
 
-class AlternatingProjecions(Optimizer):
+class AlternatingProjections(Optimizer):
 
     def __init__(self,
                  params,
                  projs
                  ):
-        super(AlternatingProjecions, self).__init__(params, dict())
+        super(AlternatingProjections, self).__init__(params, dict())
 
         self.projs = projs
         if len(self.param_groups) != 1:

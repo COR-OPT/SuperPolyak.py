@@ -1,9 +1,8 @@
 # Adapted from https://gist.github.com/pmelchior/f371dda15df8e93776e570ffcb0d1494
 from torch.optim.sgd import SGD
-from torch.optim.optimizer import required
+
 class ProxGradient(SGD):
-    def __init__(self, params, proxs, lr=required, momentum=0, dampening=0,
-                 nesterov=False):
+    def __init__(self, params, proxs, lr, momentum=0, dampening=0, nesterov=False):
         kwargs = dict(lr=lr, momentum=momentum, dampening=dampening, weight_decay=0, nesterov=nesterov)
         super().__init__(params, **kwargs)
 
