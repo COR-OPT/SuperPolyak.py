@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch import Tensor
 from torch.nn.functional import normalize
 import numpy as np
 
@@ -52,37 +53,34 @@ class MaxAffineRegressionProblem:
 class CompressedSensingProblem:
     def __init__(self, m, d, k):
         self.A = torch.randn(m, d, dtype=torch.double)
-        self.F = torch.qr(self.A, True)
         self.x = generate_sparse_vector(d, k)
         self.y = self.A @ (self.x)
         self.k = k
 
-    def proj_sparse(self, x):
+    def proj_sparse(self, x: Tensor):
         x[torch.topk(torch.abs(x), self.k)[1][-1] + 1 :] = 0
         return x
 
-    def dist_sparse(self, x):
+    def dist_sparse(self, x: Tensor):
+        d = self.x.size(0)
         return torch.linalg.norm(
-            x[torch.topk(torch.abs(x), self.x.size()[0] - self.k, largest=False)[1]]
+            torch.topk(torch.abs(x), d - self.k, largest=False).values,
         )
 
-    def proj_range(self, x):
+    def proj_range(self, x: Tensor):
         return (
             x
             + torch.linalg.lstsq(
-                self.F[0],
-                self.y - self.A @ (x),
+                self.A,
+                self.y - self.A @ x,
             )[0]
         )
 
     def dist_range(self, x):
-        return torch.norm(torch.linalg.lstsq(self.F[0], self.y - self.A @ (x))[0])
+        return torch.norm(torch.linalg.lstsq(self.A, self.y - self.A @ x).solution)
 
     def loss(self):
-        def f(z):
-            return self.dist_sparse(z) + self.dist_range(z)
-
-        return f
+        return lambda z: self.dist_sparse(z) + self.dist_range(z)
 
     def initializer(self, δ):
         return (
@@ -91,7 +89,14 @@ class CompressedSensingProblem:
         ).requires_grad_(True)
 
 
-# The phase retrieval problem
+def phase(v):
+    return v / torch.abs(v)
+
+
+def fnorm(v, nrm):
+    return torch.zeros(v.size()) if nrm <= 1e-15 else (v / nrm)
+
+
 class PhaseRetrievalProblem:
     def __init__(self, m, d):
         self.A = torch.randn(m, d, dtype=torch.cdouble)
@@ -109,35 +114,29 @@ class PhaseRetrievalProblem:
         )
 
     def loss_altproj(self):
-        A = self.A
-        y = self.y
-        m = y.size(0)
-        # Cache factorization of A.
-        F = torch.qr(A)
+        m = self.y.size(-1)
 
         def f(z):
-            z_comp = z[0:m] + z[m:] * 1j
+            z_comp = z[:m] + z[m:] * 1j
             return torch.linalg.norm(
-                z_comp - A @ (torch.linalg.lstsq(F[0], z_comp)[0])
-            ) + torch.linalg.norm(z_comp - torch.mul(y, phase(z_comp)))
+                z_comp - self.A @ (torch.linalg.lstsq(self.A, z_comp).solution)
+            ) + torch.linalg.norm(z_comp - self.y * phase(z_comp))
 
         return f
 
     def alternating_projections_step(self):
-        A = self.A
-        y = self.y
-        m = y.size(0)
-        F = torch.qr(A)
+        m = self.y.size(-1)
 
         def f(z):
-            phased = phase(A @ (torch.linalg.lstsq(F[0], z[0:m] + z[m:] * 1j)[0]))
-            return torch.cat([y * phased.real, y * phased.imag])
+            z_comp = z[:m] + z[m:] * 1j
+            phased = phase(self.A @ torch.linalg.lstsq(self.A, z_comp).solution)
+            return torch.cat([self.y * phased.real, self.y * phased.imag])
 
         return f
 
     def initializer_altproj(self, δ):
         x = self.x + δ * normalize(torch.randn(self.x.size()), dim=-1)
-        Ax = self.A @ (x)
+        Ax = self.A @ x
         return torch.cat([Ax.real, Ax.imag]).requires_grad_(True)
 
 
@@ -198,17 +197,6 @@ class BilinearSensingProblem:
         return (
             torch.cat([self.W.reshape(-1), self.X.reshape(-1)]) + δ * Δ / torch.norm(Δ)
         ).requires_grad_(True)
-
-
-# here is the translation
-
-
-def phase(v):
-    return v / torch.norm(v)
-
-
-def fnorm(v, nrm):
-    return torch.zeros(v.size()) if nrm <= 1e-15 else (v / nrm)
 
 
 def soft_threshold(x, threshold):
