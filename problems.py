@@ -95,7 +95,7 @@ class CompressedSensingProblem:
 class PhaseRetrievalProblem:
     def __init__(self, m, d):
         self.A = torch.randn(m, d, dtype=torch.cdouble)
-        self.x = normalize(torch.randn(d,dtype=torch.cdouble), dim=-1)
+        self.x = normalize(torch.randn(d, dtype=torch.cdouble), dim=-1)
         self.y = torch.abs(self.A @ self.x)
 
     def loss(self):
@@ -118,7 +118,7 @@ class PhaseRetrievalProblem:
         def f(z):
             z_comp = z[0:m] + z[m:] * 1j
             return torch.linalg.norm(
-                z_comp - A @(torch.linalg.lstsq(F[0], z_comp)[0])
+                z_comp - A @ (torch.linalg.lstsq(F[0], z_comp)[0])
             ) + torch.linalg.norm(z_comp - torch.mul(y, phase(z_comp)))
 
         return f
@@ -130,9 +130,7 @@ class PhaseRetrievalProblem:
         F = torch.qr(A)
 
         def f(z):
-            phased = phase(
-                A @(torch.linalg.lstsq(F[0],z[0:m] + z[m :] * 1j)[0])
-            )
+            phased = phase(A @ (torch.linalg.lstsq(F[0], z[0:m] + z[m:] * 1j)[0]))
             return torch.cat([y * phased.real, y * phased.imag])
 
         return f
@@ -178,12 +176,10 @@ class BilinearSensingProblem:
         self.L = np.sqrt(2.0) * torch.randn(m, d, dtype=torch.double)
         self.R = np.sqrt(2.0) * torch.randn(m, d, dtype=torch.double)
         self.W = torch.tensor(
-            np.linalg.qr(np.random.randn(d, r), mode="reduced")[0],
-            dtype=torch.double
+            np.linalg.qr(np.random.randn(d, r), mode="reduced")[0], dtype=torch.double
         )
         self.X = torch.tensor(
-            np.linalg.qr(np.random.randn(d, r), mode="reduced")[0],
-            dtype=torch.double
+            np.linalg.qr(np.random.randn(d, r), mode="reduced")[0], dtype=torch.double
         )
         self.y = torch.sum(self.L.mm(self.W) * self.R.mm(self.X), dim=1)
 
@@ -213,6 +209,7 @@ def phase(v):
 
 def fnorm(v, nrm):
     return torch.zeros(v.size()) if nrm <= 1e-15 else (v / nrm)
+
 
 def soft_threshold(x, threshold):
     return torch.sign(x) * torch.relu(torch.abs(x) - threshold)
@@ -267,33 +264,29 @@ class LassoProblem:
         return (2 / gamma) * self.noise_stddev * np.sqrt(np.log(d) / m)
 
 
-# Now we add a logistic regression example on random data
-# The loss function is the logistic loss + the l2 norm square penalty on the weights
-# there is no proximal operator
-# the gradient of the loss is the gradient of the logistic loss + the l2 norm square gradient on the weights
-
 class LogisticRegressionProblem:
     def __init__(self, m, d, noise_stddev=0.1, l2_penalty=0.1):
         self.A = torch.tensor(
             np.linalg.qr(np.random.randn(d, m))[0].T, dtype=torch.double
         )
         self.x = torch.randn(d, dtype=torch.double)
-        self.y = (self.A @ self.x > 0).double()
+        self.y = torch.tensor(
+            [1 if p > 0 else -1 for p in (self.A @ self.x).numpy()],
+            dtype=torch.double,
+        )
         self.noise_stddev = noise_stddev
         self.l2_penalty = l2_penalty
-        self.lr = 0.95 / ((np.linalg.norm(self.A, 2) ** 2)/m + l2_penalty)
+        self.lr = 0.95 / ((np.linalg.norm(self.A, 2) ** 2) / m + l2_penalty)
 
-    # the loss function for logistic regression + l2 norm square penalty on the weights
     def loss(self):
-        return lambda x: torch.mean(
-            torch.log(1 + torch.exp(-self.y * (self.A @ x)))
-        ) + self.l2_penalty * torch.linalg.norm(x) ** 2
+        return (
+            lambda x: torch.mean(torch.log(1 + torch.exp(-self.y * (self.A @ x))))
+            + self.l2_penalty * torch.linalg.norm(x) ** 2
+        )
 
-    # a pytorch command to compute the gradient of the loss function
     def loss_grad(self):
         return lambda x: torch.autograd.grad(self.loss()(x), x, create_graph=True)[0]
 
-    # a function returning a function that computes the norm of the gradient of the loss function
     def norm_grad(self):
         return lambda x: torch.linalg.norm(self.loss_grad()(x))
 
@@ -304,26 +297,19 @@ class LogisticRegressionProblem:
         ).requires_grad_(True)
 
 
-
-# Now we make a problem class for the "generative phase retrieval" problem
-# The method includes self.net which is a 2 layer neural network with ReLU activation
-# The parameters of the net are fixed. The problem is to recover the input to the net, which is a vector x
-# The loss function is torch.norm(torch.abs(A @ self.net(x)) - self.y, 2) ** 2
-# where self.y = torch.abs(A @ self.net(x)) is the output of the net
-# and A is a random matrix
-
 class GenerativePhaseRetrievalProblem:
-    def __init__(self,latent_dimension=10,d=100,m=40,nb_hidden=100):
+    def __init__(self, latent_dimension=10, d=100, m=40, nb_hidden=100):
         self.x = torch.randn(latent_dimension, dtype=torch.double)
         self.A = torch.randn(m, d, dtype=torch.double)
-        self.net = nn.Sequential(nn.Linear(latent_dimension, nb_hidden), nn.ReLU(), nn.Linear(nb_hidden, d))
-        # make sure self.net is type double
-        self.net.double()
+        self.net = nn.Sequential(
+            nn.Linear(latent_dimension, nb_hidden, dtype=torch.double),
+            nn.ReLU(),
+            nn.Linear(nb_hidden, d, dtype=torch.double),
+        )
         # make sure the parameters of self.net are not trainable
         for param in self.net.parameters():
             param.requires_grad = False
         self.y = torch.abs(self.A @ self.net(self.x))
-
 
     def loss(self):
         return lambda x: torch.linalg.norm(torch.abs(self.A @ self.net(x)) - self.y, 1)
@@ -339,6 +325,3 @@ class GenerativePhaseRetrievalProblem:
             self.x
             + δ * normalize(torch.randn(self.x.size(), dtype=torch.double), dim=-1)
         ).requires_grad_(True)
-
-
-

@@ -8,7 +8,7 @@ from scipy.linalg import LinAlgError
 from scipy.sparse.linalg import lsmr
 
 from enum import Enum
-from typing import Callable, Iterable, Tuple
+from typing import Callable, Iterable
 
 
 class BundleLinearSystemSolver(Enum):
@@ -84,7 +84,6 @@ class SuperPolyak(Optimizer):
         data_type = y0.dtype
         fvals = np.zeros(self.max_elts, dtype=data_type)
         resid = np.zeros(self.max_elts, dtype=data_type)
-        bvect = np.zeros(self.max_elts, dtype=data_type)
         fvals[0] = fy0 - self.min_f
         bvect = self._gather_flat_grad()
         # First bundle point is the standard Polyak step.
@@ -250,7 +249,7 @@ class SuperPolyak(Optimizer):
         return self.max_elts
 
     @torch.no_grad()
-    def step(self, closure) -> Tuple[float, int]:
+    def step(self, closure):
         """Perform a single polyak bundle step.
 
         Args:

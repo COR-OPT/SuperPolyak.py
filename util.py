@@ -1,13 +1,11 @@
-from enum import Enum
-from typing import Callable, Optional, Iterable
+from typing import Callable, Optional
 
 import numpy as np
-import numpy.linalg as linalg
-from scipy.sparse.linalg import lsmr
 import SuperPolyak
 
 import torch
 from torch.optim import Optimizer
+
 
 def _set_param(param_original, params_new):
     for p, pdata in zip(param_original, params_new):
@@ -19,21 +17,25 @@ def _clone_param(param):
 
 
 def _tol_reached_msg(oracle_calls: int, loss: float):
-    return (
-        "Tolerance reached! Current oracle evals: {0}, Loss = {1}"
-    ).format(oracle_calls, loss)
+    return ("Tolerance reached! Current oracle evals: {0}, Loss = {1}").format(
+        oracle_calls, loss
+    )
 
 
-def superpolyak_coupled_with_fallback(superpolyak_closure: Callable,
-                                      fallback_closure: Callable,
-                                      superpolyak_optimizer: SuperPolyak.SuperPolyak,
-                                      fallback_optimizer: Optimizer,
-                                      max_inner_iter: int,
-                                      max_outer_iter: int,
-                                      mult_factor: float = .5,
-                                      tol: float = 1e-16,
-                                      verbose: bool = False,
-                                      metric_to_print : Callable = None):
+def superpolyak_coupled_with_fallback(
+    superpolyak_closure: Callable,
+    fallback_closure: Callable,
+    superpolyak_optimizer: SuperPolyak.SuperPolyak,
+    fallback_optimizer: Optimizer,
+    max_inner_iter: int,
+    max_outer_iter: int,
+    mult_factor: float = 0.5,
+    tol: float = 1e-16,
+    verbose: bool = False,
+    metric_to_print: Optional[Callable] = None,
+):
+    def _get_metric_msg():
+        return f", Metric = {metric_to_print()}" if metric_to_print is not None else ""
 
     loss = superpolyak_closure().item()
     loss_list = [loss]
@@ -45,22 +47,23 @@ def superpolyak_coupled_with_fallback(superpolyak_closure: Callable,
             if verbose:
                 print(_tol_reached_msg(oracle_calls[-1], loss))
             return oracle_calls, loss_list
-        loss_superpolyak_step, bundle_idx = superpolyak_optimizer.step(superpolyak_closure)
+        loss_superpolyak_step, bundle_idx = superpolyak_optimizer.step(
+            superpolyak_closure
+        )
         loss_list.append(loss_superpolyak_step)
         oracle_calls.append(oracle_calls[-1] + bundle_idx)
         if loss_superpolyak_step < mult_factor * loss:
             if verbose:
-                if metric_to_print == None:
-                    print("SuperPolyak step accepted!",
-                          "Current oracle evaluations: ", oracle_calls[-1],
-                          ", Loss = ", loss_superpolyak_step,
-                          ", Bundle index = ", bundle_idx)
-                else:
-                    print("SuperPolyak step accepted!",
-                      "Current oracle evaluations: ", oracle_calls[-1],
-                      ", Loss = ", loss_superpolyak_step,
-                      ", Bundle index = ", bundle_idx,
-                      ", Metric = ", metric_to_print())
+                print(
+                    "SuperPolyak step accepted!",
+                    "Current oracle evaluations: ",
+                    oracle_calls[-1],
+                    ", Loss = ",
+                    loss_superpolyak_step,
+                    ", Bundle index = ",
+                    bundle_idx,
+                    _get_metric_msg(),
+                )
         else:
             if loss_superpolyak_step >= loss:
                 _set_param(superpolyak_optimizer._params, cloned_param)
@@ -79,19 +82,18 @@ def superpolyak_coupled_with_fallback(superpolyak_closure: Callable,
                         print(_tol_reached_msg(oracle_calls[-1], fallback_loss))
                     return oracle_calls, loss_list
             if verbose:
-                if metric_to_print == None:
-                    print("Fallback step accepted!",
-                          "Current oracle evaluations: ", oracle_calls[-1],
-                          ", Loss = ", fallback_loss)
-                else:
-                    print("Fallback step accepted!",
-                          "Current oracle evaluations: ", oracle_calls[-1],
-                          ", Loss = ", fallback_loss,
-                          ", Metric = ", metric_to_print())
+                print(
+                    "Fallback step accepted!",
+                    "Current oracle evaluations: ",
+                    oracle_calls[-1],
+                    ", Loss = ",
+                    fallback_loss,
+                    _get_metric_msg(),
+                )
             if loss == fallback_loss:
                 print("Algorithm is stuck, returning early.")
                 return oracle_calls, loss_list
-        _set_param(cloned_param,superpolyak_optimizer._params)
+        _set_param(cloned_param, superpolyak_optimizer._params)
     return oracle_calls, loss_list
 
 
