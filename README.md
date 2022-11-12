@@ -79,8 +79,8 @@ $$
 
 SuperPolyak is inspired by Newton's method taught in first-year calculus. Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
 
-- Construct the tangent approximation of $f$ at $x_k$
-- Declare $x_{k+1}$ to be the root of the tangent approximation.
+- Construct the tangent approximation of $f$ at the current iterate
+- Declare the next iterate to be the root of the tangent approximation.
 
 The following gif shows newton's method in action.
 
