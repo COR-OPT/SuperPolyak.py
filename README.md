@@ -1,22 +1,16 @@
 # Superpolyak.py
 
-SuperPolyak.py is a pytorch library for solving nonsmooth equations. The library implements the SuperPolyak algorithm, the formal details of which can be found in the preprint:
-
-V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, 2022. URL: https://arxiv.org/abs/2201.04611.
-
-**Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
-
-## What is SuperPolyak?
-
-SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations of the form:
+ SuperPolyak [0] is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
 
 $$
-f(\bar x) = 0
+f(\bar x) = 0 \qquad \iff \qquad  \min f(x) 
 $$
 
-where $f$ is a _nonnegative function_. As it is a first-order method, it is based solely on function and "gradient" evaluations.
+where $f$ is a _nonnegative function_. When certain **minimal assumptions** are met, SuperPolyak locally converges **doubly exponentially fast** (i.e., "superlinearly").
 
-When certain **minimal assumptions** are met, SuperPolyak locally converges **doubly exponentially fast** (i.e., "superlinearly").
+**Note:** Optimization problems  
+
+[0] V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, 2022. URL: https://arxiv.org/abs/2201.04611.
 
 ### Example: Fitting a 1-hidden layer neural network with max-pooling
 
@@ -31,8 +25,29 @@ Now let's plot the performance.
   - We run SuperPolyak and a standard first-order method (Polyak). 
 - **Conclusion:** 
   - Superpolyak outperforms Polyak both in terms of time and oracle calls (evals of $f$ and its gradient).
-
 ![Performance Plot](figures/max_linear_regression.png)
+
+
+
+The above convergence plot is 
+
+
+
+SuperPolyak.py is a pytorch library for solving nonsmooth equations and optimization problems.
+
+
+
+The library implements the SuperPolyak algorithm, the formal details of which can be found in the preprint:
+
+
+
+**Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
+
+## What is SuperPolyak?
+
+S
+
+
 
 
 # How to use
