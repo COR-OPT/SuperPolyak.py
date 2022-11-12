@@ -27,7 +27,7 @@ Let's try to fit a simple neural network with $d$ parameters, $r$ hidden units, 
 Now let's plot the performance. 
 - **Setup:** 
   - We use Gaussian data.
-  - We set $d = 500$, we vary $r$ and we set $m = 3dr$.
+  - We set $d = 500$, vary $r$, and set $m = 3dr$.
   - We run SuperPolyak and a standard first-order method (Polyak). 
 - **Conclusion:** 
   - Superpolyak outperforms Polyak both in terms of time and oracle calls (evals of $f$ and its gradient).
