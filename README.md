@@ -77,7 +77,7 @@ $$
 
 # What is SuperPolyak doing? 
 
-SuperPolyak is inspired by _Newton's method_ taught in first-year calculus. Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
+SuperPolyak is inspired by _Newton's method_, which is taught in first-year calculus. Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
 
 - Construct the tangent approximation of $f$ at the current iterate
 - Declare the next iterate to be the root of the tangent approximation.
