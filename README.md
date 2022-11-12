@@ -18,7 +18,7 @@ where $f$ is a _nonnegative function_ with minimal value $0$. When certain **min
 
 #### Example 1: Fitting a 1-hidden layer neural network with max-pooling
 
-![Neural network](figures/neural_network.png)
+[//]: # (![Neural network]&#40;figures/neural_network.png&#41;)
 
 
 Let's try to fit a simple neural network with max-pooling to data
