@@ -15,13 +15,31 @@ $$
 
 where $f$ is a _nonnegative function_ with minimal value $0$. When certain **minimal assumptions** are met, SuperPolyak locally converges **doubly exponentially fast** (i.e., "superlinearly").
 
+
 #### Example 1: Fitting a 1-hidden layer neural network with max-pooling
 
-Let's try to fit a simple neural network with $d$ parameters, $r$ hidden units, and $m$ data samples (the following slide describes the architecture).
+![Performance Plot](figures/neural_network.png)
 
-![An img describing problem class](figures/max_pooling_neural_network.001.png)
 
-Now let's plot the performance. 
+Let's try to fit a simple neural network with max-pooling to data
+
+$$
+(a_1, y_1), \ldots, (a_m, y_m)
+$$
+
+The network has $d$ parameters, $r$ hidden units, and $m$ data samples. Concretely, we want to solve the $m$ equations for weights $\beta_j$:
+
+$$
+\max_{j \in [r]} \langlea_i, \beta_j\rangle = y_i \qquad i \in [m]  
+$$
+
+We reformulate this as a root finding problem: 
+
+$$
+\text{Find a root of } f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langlea_i, \beta_j\rangle|.
+$$
+
+Now let's plot the **performance.** 
 - **Setup:** 
   - We use Gaussian data.
   - We set $d = 500$, vary $r$, and set $m = 3dr$.
@@ -30,8 +48,11 @@ Now let's plot the performance.
   - Superpolyak outperforms Polyak both in terms of time and oracle calls (evals of $f$ and its gradient).
 ![Performance Plot](figures/max_linear_regression.png)
 
-### Example 2: Solving a convex optimization problem 
+### Example 2: Solving a smooth and strongly convex optimization  
 
+
+
+**TODO:** Vas please make a pretty plot like the above for logistic regression.
 
 
 # How to use
