@@ -13,7 +13,7 @@ $$
 f(\bar x) = 0 \qquad \iff \qquad  \min f(x) 
 $$
 
-where $f$ is a _nonnegative function_ with minimal value $0$. When certain **minimal assumptions** are met, SuperPolyak locally converges **doubly exponentially fast** (i.e., "superlinearly").
+where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$. When certain **minimal assumptions** are met, SuperPolyak locally converges **doubly exponentially fast** (i.e., "superlinearly").
 
 
 ### Example 1: Fitting a 1-hidden layer neural network with max-pooling
@@ -67,6 +67,7 @@ $$
 $$
 
 **TODO:** Vas please make a pretty plot like the above for logistic regression.
+**TODO** Need newton's method
 - **Setup:**
   - We fit a logistic regression model with l2 regularization to Gaussian data.
   - We vary the dimension $d$ and the number of parameters $m$.
@@ -109,18 +110,29 @@ k		2^{-2^{k}}
 ```
 
 
-## Slow-downs of Newton's method in higher dimenions
+## Slow-down of Newton's method in higher dimensions
 
+Now let's consider an example where the dimension fo the parameter $d$ is greater than 1. In this setting, Newton's method is defined similarly, but with a key difference, highlighted in bold:
+
+- Construct the tangent approximation of $f$ at the current iterate
+- Declare the next iterate to be the **nearest root** of the tangent approximation.
+
+Here, a qualifier such as **nearest root** is necessary since there are infinitely many roots of the tangent approximation, as shown in the following contour plot, corresponding to the function $f(x,y) = \|(x, 2*y)\|$.
+
+![Performance Plot](figures/newton_2d_onestep.png)
+
+How well does the above Newton's method work? The following animation suggests that it works quite well:
 
 ![Newton's Method](figures/newton_2d.gif)
 
+But is the convergence rate still doubly exponential? The following plot shows that it is not. In fact, the convergence rate is only exponential.
 
-# Theoretical guarantees
+![Newton's method 2d convergence plot](figures/newton_2d_linear_only.png)
 
-For full details, please read the reference [0]. A high-level summary of the results are 
+## SuperPolyak: a method for repairing Newton's method in higher dimensions
 
-- 
 
+![SuperPolyak](figures/superpolyak_contour.gif)
 
 # How to use
 
