@@ -71,7 +71,7 @@ $$
 **TODO:** Vas please make a pretty plot like the above for logistic regression.
 - **Setup:**
   - We fit a logistic regression model with l2 regularization to Gaussian data.
-  - We vary the dimension $d$ and the parameter $m$.
+  - We vary the dimension $d$ and the number of parameters $m$.
   - We run SuperPolyak, gradient descent, and Newton's method.
 - **Conclusion:**
   - Superpolyak outperforms both methods both in terms of time and oracle calls (evals of $f$ and its gradient)?
