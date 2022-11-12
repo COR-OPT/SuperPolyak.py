@@ -39,7 +39,7 @@ $$
 \text{Find a root of } f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langle a_i, \beta_j\rangle|.
 $$
 
-Now let's plot the **performance.** 
+Now let's do a quick experiment:
 - **Setup:** 
   - We use Gaussian data.
   - We set $d = 500$, vary $r$, and set $m = 3dr$.
@@ -48,12 +48,33 @@ Now let's plot the **performance.**
   - Superpolyak outperforms Polyak both in terms of time and oracle calls (evals of $f$ and its gradient).
 ![Performance Plot](figures/max_linear_regression.png)
 
-### Example 2: Solving a smooth and strongly convex optimization  
+#### Example 2: Solving a smooth and strongly convex optimization  
 
+Let's try to solve the following optimization problem:
 
+$$
+\min l(x) 
+$$
+
+where $l$ is a smooth and strongly convex function. If $l$ is nonnegative, we can apply SuperPolyak to $l$. Otherwise, we reformulate it via first-order optimality conditions (due to convexity):
+
+$$
+\text{Find a root of } \nabla l(x).
+$$
+
+The gradient $\nabla l$ is a mapping, not a function. No problem, just reformulate via the norm:
+
+$$
+\text{Find a root of } f(x) = \|\nabla l(x)\|.
+$$
 
 **TODO:** Vas please make a pretty plot like the above for logistic regression.
-
+- **Setup:**
+  - We fit a logistic regression model with l2 regularization to Gaussian data.
+  - We vary the dimension $d$ and the parameter $m$.
+  - We run SuperPolyak, gradient descent, and Newton's method.
+- **Conclusion:**
+  - Superpolyak outperforms both methods both in terms of time and oracle calls (evals of $f$ and its gradient)?
 
 # How to use
 
