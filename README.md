@@ -21,7 +21,9 @@ When certain **minimal assumptions** are met, SuperPolyak locally converges **do
 ### Example: Fitting a 1-hidden layer neural network with max-pooling
 
 Let's try to fit a simple neural network with $d$ parameters, $r$ hidden units, and $m$ data samples. The next slide shows the network architecture:
-![alt_text](figures/max_pooling_neural_network.001.png)
+
+![An img describing problem class](figures/max_pooling_neural_network.001.png)
+
 Now let's plot the performance. 
 - **Setup:** 
   - We use Gaussian data.
@@ -30,7 +32,7 @@ Now let's plot the performance.
 - **Conclusion:** 
   - Superpolyak outperforms Polyak both in terms of time and oracle calls (evals of $f$ and its gradient).
 
-![alt text](figures/max_linear_regression.png)
+![Performance Plot](figures/max_linear_regression.png)
 
 
 # How to use
