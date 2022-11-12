@@ -89,7 +89,7 @@ The following gif shows newton's method in action.
 If we start close enough to the root $\overline x$ and reasonable assumptions hold, Newton's method is doubly exponentially convergent, meaning
 
 $$
-\|x_{k+1} - \overline x\| \leq \text{const} 2^{-2^k}
+\|x_{k+1} - \overline x\| \leq \text{const} \cdot 2^{-2^k}
 $$
 
 This super fast. To put this in perspective, around 10 steps gives ~300 digits of accuracy.
