@@ -1,20 +1,23 @@
 # Superpolyak.py
 
+A pytorch implementation of the SuperPolyak subgradient method [0].
+
+**Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
+
+## What is SuperPolyak?
+
+### Problem formulation 
  SuperPolyak [0] is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
 
 $$
 f(\bar x) = 0 \qquad \iff \qquad  \min f(x) 
 $$
 
-where $f$ is a _nonnegative function_. When certain **minimal assumptions** are met, SuperPolyak locally converges **doubly exponentially fast** (i.e., "superlinearly").
+where $f$ is a _nonnegative function_ with minimal value $0$. When certain **minimal assumptions** are met, SuperPolyak locally converges **doubly exponentially fast** (i.e., "superlinearly").
 
-**Note:** Optimization problems  
+#### Example 1: Fitting a 1-hidden layer neural network with max-pooling
 
-[0] V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, 2022. URL: https://arxiv.org/abs/2201.04611.
-
-### Example: Fitting a 1-hidden layer neural network with max-pooling
-
-Let's try to fit a simple neural network with $d$ parameters, $r$ hidden units, and $m$ data samples. The next slide shows the network architecture:
+Let's try to fit a simple neural network with $d$ parameters, $r$ hidden units, and $m$ data samples (the following slide describes the architecture).
 
 ![An img describing problem class](figures/max_pooling_neural_network.001.png)
 
@@ -27,26 +30,7 @@ Now let's plot the performance.
   - Superpolyak outperforms Polyak both in terms of time and oracle calls (evals of $f$ and its gradient).
 ![Performance Plot](figures/max_linear_regression.png)
 
-
-
-The above convergence plot is 
-
-
-
-SuperPolyak.py is a pytorch library for solving nonsmooth equations and optimization problems.
-
-
-
-The library implements the SuperPolyak algorithm, the formal details of which can be found in the preprint:
-
-
-
-**Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
-
-## What is SuperPolyak?
-
-S
-
+### Example 2: Solving a convex optimization problem 
 
 
 
@@ -69,3 +53,8 @@ Animation of algorithm from paper.
 The figure from Vasilis presentation with fallback. 
 
 An example code.
+
+
+# References
+
+[0] V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, 2022. URL: https://arxiv.org/abs/2201.04611.
