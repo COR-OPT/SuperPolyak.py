@@ -4,10 +4,10 @@ A pytorch implementation of the SuperPolyak subgradient method [0].
 
 **Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
 
-## What is SuperPolyak?
+# What is SuperPolyak?
 
-### Problem formulation 
- SuperPolyak [0] is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
+## Problem formulation 
+ SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
 
 $$
 f(\bar x) = 0 \qquad \iff \qquad  \min f(x) 
@@ -16,9 +16,7 @@ $$
 where $f$ is a _nonnegative function_ with minimal value $0$. When certain **minimal assumptions** are met, SuperPolyak locally converges **doubly exponentially fast** (i.e., "superlinearly").
 
 
-#### Example 1: Fitting a 1-hidden layer neural network with max-pooling
-
-[//]: # (![Neural network]&#40;figures/neural_network.png&#41;)
+### Example 1: Fitting a 1-hidden layer neural network with max-pooling
 
 
 Let's try to fit a simple neural network with max-pooling to data
@@ -48,7 +46,7 @@ Now let's do a quick experiment:
   - Superpolyak outperforms Polyak both in terms of time and oracle calls (evals of $f$ and its gradient).
 ![Performance Plot](figures/max_linear_regression.png)
 
-#### Example 2: Solving a smooth and strongly convex optimization  
+### Example 2: Solving a smooth and strongly convex optimization  
 
 Let's try to solve the following optimization problem:
 
@@ -76,21 +74,42 @@ $$
 - **Conclusion:**
   - Superpolyak outperforms both methods both in terms of time and oracle calls (evals of $f$ and its gradient)?
 
+
+# What is SuperPolyak doing? 
+
+SuperPolyak is inspired by Newton's method taught in first-year calculus. Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
+
+- Construct the tangent approximation of $f$ at $x_k$
+- Declare $x_{k+1}$ to be the root of the tangent approximation.
+
+The following gif shows newton's method in action.
+
+![Newton's Method](figures/newton_movie_slow.gif)
+
+# Theoretical guarantees
+
+For full details, please read the reference [0]. A high-level summary of the results are 
+
+- 
+
+
 # How to use
 
-## Two ways to run the code
+SuperPolyak can be run in two ways: 
+- Method 1: standalone pytorch optimizer; 
+- Method 2: coupled with another pytorch optimizer.
 
-SuperPolyak can be run in two ways. 
+## Standalone optimizer class
 
-### Standalone optimizer class
+SuperPolyak inherits from the pytorch optimizer class. It has several options. 
+- max_elts: The size of the bundle.
+- ...
 
-How to use the optimizer class:
-
-#### What a single step does (and what are the options)
+### What a single step does (and what are the options)
 
 Animation of algorithm from paper.
 
-### Coupling with a fallback algorithm (e.g. SGD)
+## Coupling with a fallback algorithm (e.g. SGD)
 
 The figure from Vasilis presentation with fallback. 
 
