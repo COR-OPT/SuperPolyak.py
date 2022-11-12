@@ -30,13 +30,13 @@ $$
 The network has $d$ parameters, $r$ hidden units, and $m$ data samples. Concretely, we want to solve the $m$ equations for weights $\beta_j$:
 
 $$
-\max_{j \in [r]} \langlea_i, \beta_j\rangle = y_i \qquad i \in [m]  
+\max_{j \in [r]} \langle a_i, \beta_j\rangle = y_i \qquad i \in [m]  
 $$
 
 We reformulate this as a root finding problem: 
 
 $$
-\text{Find a root of } f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langlea_i, \beta_j\rangle|.
+\text{Find a root of } f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langle a_i, \beta_j\rangle|.
 $$
 
 Now let's plot the **performance.** 
