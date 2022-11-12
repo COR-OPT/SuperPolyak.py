@@ -77,7 +77,7 @@ $$
 
 # What is SuperPolyak doing? 
 
-SuperPolyak is inspired by Newton's method taught in first-year calculus. Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
+SuperPolyak is inspired by _Newton's method_ taught in first-year calculus. Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
 
 - Construct the tangent approximation of $f$ at the current iterate
 - Declare the next iterate to be the root of the tangent approximation.
@@ -85,6 +85,35 @@ SuperPolyak is inspired by Newton's method taught in first-year calculus. Newton
 The following gif shows newton's method in action.
 
 ![Newton's Method](figures/newton_movie_slow.gif)
+
+If we start close enough to the root $\overline x$ and reasonable assumptions hold, Newton's method is doubly exponentially convergent, meaning
+
+$$
+\|x_{k+1} - \overline x\| \leq \text{const} 2^{-2^k}
+$$
+
+This super fast. To put this in perspective, around 10 steps gives ~300 digits of accuracy.
+```
+k		2^{-2^{k}}
+-------------------------------------------------
+1		2.50e-01
+2		6.25e-02
+3		3.91e-03
+4		1.53e-05
+5		2.33e-10
+6		5.42e-20
+7		2.94e-39
+8		8.64e-78
+9		7.46e-155
+10		5.56e-309
+```
+
+
+## Slow-downs of Newton's method in higher dimenions
+
+
+![Newton's Method](figures/newton_2d.gif)
+
 
 # Theoretical guarantees
 
