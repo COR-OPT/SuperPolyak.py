@@ -142,9 +142,10 @@ This idea is illustrated in the following animation:
 
 ![SuperPolyak](figures/superpolyak_contour.gif)
 
-This approach works well, and essentially finds the solution in 2 evals of $f$ and $g$.
+This approach works well, and essentially finds the solution in 2 evals of $f$ and its gradient.
 
-![SuperPolyak Function Values](figures/SuperPolyak_function_value.png)
+![SuperPolyak function values](figures/superpolyak_subgradient_method_function_values.png)
+
 
 ### The full Algorithm.
 
