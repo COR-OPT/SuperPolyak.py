@@ -158,7 +158,8 @@ From the above animation, we see the approach works well, essentially finding th
 ## When does SuperPolyak work?
 
 Two broad families of examples where SuperPolyak works well:
-- Piecewise linear functions, e.g., for $f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langle a_i, \beta_j\rangle|.$
+- Piecewise linear functions, e.g., for 
+$$f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langle a_i, \beta_j\rangle|.$$
 - 
 
 SuperPolyak works under minimal assumptions known as "sharpness" and "semismoothness."
