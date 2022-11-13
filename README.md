@@ -13,7 +13,7 @@ $$
 f(\bar x) = 0 \qquad \iff \qquad  \min f(x) 
 $$
 
-where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$. When certain **minimal assumptions** are met, SuperPolyak locally converges **doubly exponentially fast** (i.e., "superlinearly").
+where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$. When certain **minimal assumptions** are met, SuperPolyak locally converges **superlinearly** (i.e., "double exponentially").
 
 
 ### Example 1: Fitting a 1-hidden layer neural network with max-pooling
@@ -87,7 +87,7 @@ The following gif shows newton's method in action.
 
 ![Newton's Method](figures/newton_movie_slow.gif)
 
-If we start close enough to the root $\overline x$ and reasonable assumptions hold, Newton's method is doubly exponentially convergent, meaning
+If we start close enough to the root $\overline x$ and reasonable assumptions hold, Newton's method is superlinearly convergent, meaning
 
 $$
 \|x_{k+1} - \overline x\| \leq \text{const} \cdot 2^{-2^k}
@@ -125,22 +125,25 @@ How well does the above Newton's method work? The following animation suggests t
 
 ![Newton's Method](figures/newton_2d.gif)
 
-But is the convergence rate still doubly exponential? The following plot shows that it is not. In fact, the convergence rate is only exponential.
+While fast, the following plot shows the method converges only linearly, not superlinearly.
 
 ![Newton's method 2d convergence plot](figures/newton_function_values.png)
 
-Can we do better?
+Is it possible to recover the superlinear rate?
 
 ## The SuperPolyak step: a method for repairing Newton's method in higher dimensions
 
-The problem with Newton's method in higher dimensions is that there are infinitely many roots to the tangent approximation: why should we expect that the nearest root is very close to the solution?
+The issue with Newton's method in higher dimensions is that there are infinitely many roots to the tangent approximation: why should we expect that the nearest root is very close to the solution?
 
-SuperPolyak is motivated by the following question:
+In the interest of fixing this, we ask the following simple question:
+
 > What if we choose the next iterate to be a root of several distinct tangent approximations?
 
-Since each tangent approximation corresponds to a linear equation, leveraging $d$ "linearly independent" tangent approximations makes the choice of the next iterate less arbitrary and potentially closer to the solution. 
+For example, suppose we could find $d$ "linearly independent" tangent approximations. Then the choice of the next iterate could simply be the intersection, which is unique. 
 
-There are infinitely many ways to chose the "several distinct tangent approximations." For example, we could choose the locations randomly. Instead of random, we suggest the following iterative scheme (here $g$ is a "gradient of $f$", e.g., the output of autodifferentiation):
+There are infinitely many ways to choose the "several distinct tangent approximations." For example, we could choose the locations randomly or sampled from the past history of the algorithm. 
+
+Instead of random, we suggest the following iterative scheme (here $g$ is a "gradient of $f$", e.g., the output of autodifferentiation):
 
 ![SuperPolyak explnanation](figures/SuperPolyak_alg_explanation.gif)
 
@@ -152,34 +155,21 @@ From the above animation, we see the approach works well, essentially finding th
 
 ![SuperPolyak function values](figures/superpolyak_subgradient_method_function_values.png)
 
+## When does SuperPolyak work?
+
+
+
 ## Practical improvements: early termination of the SuperPolyak step
 
-In [0], we show that SuperPolyak converges superlinearly. However, its Naïve implementation could be prohibitively expensive, since it requires $d$ evaluations of $f$ and its gradient. We've found that this number can be substantially reduced in practice. 
-
-We implement two early termination strategies in SuperPolyak.py, both of which are described in [Section 5.1.1, 0]:
+In [0], we show that SuperPolyak converges superlinearly. However, its Naïve implementation could be prohibitively expensive, since it requires $d$ evaluations of $f$ and its gradient. We've found that this number can be substantially reduced in practice. For instance, in example 1, the total number of iterations is much less than $d = 500$. To achieve this, we implement two early termination strategies, in SuperPolyak.py, both of which are described in [Section 5.1.1, 0]:
 
 - Fix a maximum per-step budget, called ```max_elt```. Then declare the next iterate to be the best among the first ```max_elt``` points $y_i$.
 - Fix a "superlinear improvement" exponent ```eta_est``` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \eta}$. 
 
 
-[//]: # (## Why does SuperPolyak work?)
+## What about semismooth newton?
 
-[//]: # ()
-[//]: # (The choice construction of the points $y_i$ in SuperPolyak is a bit mysterious. However, under certain conditions that can be found in [0], they lead to the following of alternatives.)
-
-[//]: # ()
-[//]: # (![Why does it work?]&#40;figures/whyitworks.gif&#41;)
-
-[//]: # ()
-[//]: # ()
-[//]: # ()
-[//]: # (A couple of questions and answers: )
-
-[//]: # (- Q: Why stop at $d-1$?)
-
-[//]: # (- A: Our theoretical )
-
-
+Semismooth Newton's method [1] is the direct generalization of Newton's method to the case where $f$ is not smooth. It is known to converge superlinearly in several circumstances outlined in [0]. However, for the problems we consider here, it's convergence is at best linear, as we demonstrated on the function $f(x,y) = \|(x, 2y)\|$.
 
 
 # How to use
@@ -208,3 +198,5 @@ An example code.
 # References
 
 [0] V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, 2022. URL: https://arxiv.org/abs/2201.04611.
+
+[1] Qi and Sun
