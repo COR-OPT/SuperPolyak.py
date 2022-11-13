@@ -208,4 +208,4 @@ An example code.
 
 [1] Qi and Sun
 
-[^semismooth]: asdfasdfja;sdkf 
+[^semismooth]: This story is somewhat subtle. One could of course reformulate the problem to finding a root of the **smooth** mapping $F(x,y) = \begin{bmatrix} x \\ 2y \end{bmatrix}$ and apply the standard Newton method, which would converge superlinearly. However, our goal is to treat the loss function $f(x) = \|(x, 2y)\|$ as a blackbox, accessible only through gradient and function evaluations. Under this setting, Newton's method only converges linearly.
