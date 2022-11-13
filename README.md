@@ -159,7 +159,7 @@ In [0], we show that SuperPolyak converges superlinearly. However, its Naïve im
 We implement three early termination strategies in SuperPolyak.py, all of which are described in [Section 5.1.1, 0]:
 
 - Fix a maximum per-step budget, called ```max_elt```. Then declare the next iterate to be the best among the first ```max_elt``` points $y_i$.
-- Fix a "superlinear improvement" exponent ```eta_est``` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \texttt{eta_est}}$. 
+- Fix a "superlinear improvement" exponent ```eta_est``` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \texttt{eta\_est}}$. 
 - 
 
 
