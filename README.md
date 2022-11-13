@@ -15,9 +15,10 @@ Outline
   - [The SuperPolyak step: a method for repairing Newton's method in higher dimensions](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions)
   - [Practical improvements: early termination of the SuperPolyak step](#practical-improvements-early-termination-of-the-superpolyak-step)
   - [When does SuperPolyak work?](#when-does-superpolyak-work)
-  - [What about semismooth newton?](#what-about-semismooth-newton)
+  - [Comparison to semismooth Newton](#what-about-semismooth-newton)
+    - [Potential benefits of SuperPolyak over semismooth Newton](#potential-benefits-of-superpolyak-over-semismooth-newton)
 - [How to use](#how-to-use)
-  - [Standalone optimizer class](#-standalone-optimizer-class)
+  - [Standalone optimizer class](#standalone-optimizer-class)
   - [Coupling with a fallback algorithm (e.g. SGD)](#coupling-with-a-fallback-algorithm-eg-sgd)
 - [References](#references)
 
@@ -195,7 +196,7 @@ In [0], we show that SuperPolyak converges superlinearly. However, its Naïve im
 - Fix a "superlinear improvement" exponent ```eta_est``` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \eta}$. 
 
 
-## What about semismooth newton?
+## Comparison semismooth newton?
 
 Semismooth Newton's method is the direct generalization of Newton's method to systems of nonsmooth systems of equations: 
 
@@ -213,9 +214,9 @@ where $G(x_k)$ denotes a "generalized Jacobian" of $F$ at $x_k and $G(x_k)^{\dag
 
 Semismooth newton is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the function $f(x,y) = \|(x, 2y)\|$.[^semismooth].
 
+**TODO:** Vas help me fix the dagger command.
 
-
-### A potential benefit of SuperPolyak over semismooth Newton
+### Potential benefits of SuperPolyak over semismooth Newton
 
 If one is presented with a nonsmooth system of equations $F$ as above, a natural idea is to apply SuperPolyak to 
 
