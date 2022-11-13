@@ -4,6 +4,23 @@ A pytorch implementation of the SuperPolyak subgradient method[^superpolyak_refe
 
 **Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
 
+Outline 
+- [What is SuperPolyak?](#what-is-superpolyak)
+  - [Problem formulation](#problem-formulation)
+    - [Example 1: Fitting a 1-hidden layer neural network with max-pooling](#example-1-fitting-a-1-hidden-layer-neural-network-with-max-pooling)]
+    - [Example 2: Solving a smooth and strongly convex optimization problem](#example-2-solving-a-smooth-and-strongly-convex-optimization-problem)
+- [What is SuperPolyak doing?](#what-is-superpolyak-doing)
+  - [Newton's method](#newtons-method)
+  - [Slow-down of Newton's method in higher dimensions](#slow-down-of-newtons-method-in-higher-dimensions)
+  - [The SuperPolyak step: a method for repairing Newton's method in higher dimensions](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions)
+  - [Practical improvements: early termination of the SuperPolyak step](#practical-improvements-early-termination-of-the-superpolyak-step)
+  - [When does SuperPolyak work?](#when-does-superpolyak-work)
+  - [What about semismooth newton?](#what-about-semismooth-newton)
+- [How to use](#how-to-use)
+  - [Standalone optimizer class](#-standalone-optimizer-class)
+  - [Coupling with a fallback algorithm (e.g. SGD)](#coupling-with-a-fallback-algorithm-eg-sgd)
+- [References](#references)
+
 # What is SuperPolyak?
 
 ## Problem formulation 
@@ -46,7 +63,7 @@ Now let's do a quick experiment:
   - Superpolyak outperforms Polyak both in terms of time and oracle calls (evals of $f$ and its gradient).
 ![Performance Plot](figures/max_linear_regression.png)
 
-### Example 2: Solving a smooth and strongly convex optimization  
+### Example 2: Solving a smooth and strongly convex optimization problem
 
 Let's try to solve the following optimization problem:
 
@@ -78,7 +95,10 @@ $$
 
 # What is SuperPolyak doing? 
 
-SuperPolyak is inspired by _Newton's method_, which is taught in first-year calculus. Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
+SuperPolyak is inspired by _Newton's method_, which is taught in first-year calculus. 
+
+## Newton's method 
+Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
 
 - Construct the tangent approximation of $f$ at the current iterate
 - Declare the next iterate to be the root of the tangent approximation.
@@ -230,7 +250,6 @@ SuperPolyak can be run in two ways:
 - Method 2: [coupled with another pytorch optimizer](#coupling-with-a-fallback-algorithm-eg-SGD)
 
 ## Standalone optimizer class
-
 
 
 SuperPolyak inherits from the pytorch optimizer class. 
