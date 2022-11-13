@@ -162,7 +162,7 @@ Two broad families of examples where SuperPolyak locally converges superlinearly
 $$f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langle a_i, \beta_j\rangle|.$$
 - Generic semialgebraic mappings, e.g., for
 $$f_v = \|F(x) - v\|,$$
-where $F$ is a "semialgebraic mapping" and $v$ is a "generic" fector.
+where $F$ is a "semialgebraic mapping" and $v$ is a "generic" vector.
 
 More formally, SuperPolyak works under minimal assumptions known as "sharpness" and "semismoothness."
 
