@@ -206,7 +206,7 @@ There are two reasons to try this:
 First, SuperPolyak is known to work under less restrictive assumptions than semismooth Newton.[^subregularity] 
 
 
-Second, with SuperPolyak, one can sometimes get away with solving significantly smaller linear systems than with semismooth Newton. Indeed, let us compare the linear algebra cost of each iteration of SuperPolyak and semismooth Newton. Both methods must solve a linear system at each step. Semismooth Newton solves a system of size $m \times d$, while SuperPolyak solves a system of size $d \times d$. However, using the [early termination](#1-practical-improvements:-early-termination-of-the-superpolyak-step)
+Second, with SuperPolyak, one can sometimes get away with solving significantly smaller linear systems than with semismooth Newton. Indeed, let us compare the linear algebra cost of each iteration of SuperPolyak and semismooth Newton. Both methods must solve a linear system at each step. Semismooth Newton solves a system of size $m \times d$, while SuperPolyak solves a system of size $d \times d$. However, using the [early termination](#practical-improvements:-early-termination-of-the-superpolyak-step)
  strategies outlined in 
 
 
