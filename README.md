@@ -129,10 +129,27 @@ But is the convergence rate still doubly exponential? The following plot shows t
 
 ![Newton's method 2d convergence plot](figures/newton_function_values.png)
 
+Can we do better?
+
 ## SuperPolyak: a method for repairing Newton's method in higher dimensions
 
+The problem with Newton's method in higher dimensions is that there are infinitely many roots to the tangent approximation: why should we expect that the nearest root is very close to the solution?
+
+SuperPolyak is motivated by the following question:
+> What if we choose the next iterate to be a root of several distinct tangent approximations?
+
+This idea is illustrated in the following animation:
 
 ![SuperPolyak](figures/superpolyak_contour.gif)
+
+This approach works well, and essentially finds the solution in 2 evals of $f$ and $g$.
+
+![SuperPolyak Function Values](figures/SuperPolyak_function_value.png)
+
+### The full Algorithm.
+
+![SuperPolyak Explanation](figures/SuperPolyak_alg_explanation.gif)
+
 
 # How to use
 
