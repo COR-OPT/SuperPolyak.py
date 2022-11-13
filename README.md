@@ -183,14 +183,12 @@ $$
 where $F \colon \mathbb{R}^d \rightarrow \mathbb{R}^m$. The algorithm iterates
 
 $$
-x_{k+1} = x_k - G(x_k)^{\daggger} F(x_k), 
+x_{k+1} = x_k - G(x_k)^{\dag} F(x_k), 
 $$
 
-where $G(x_k)$ denotes a "generalized Jacobian" of $F$ at $x_k and $G(x_k)^{\dagger}$ denotes its Moore-Penrose pseudoinverse.
+where $G(x_k)$ denotes a "generalized Jacobian" of $F$ at $x_k and $G(x_k)^{\dag}$ denotes its Moore-Penrose pseudoinverse.
 
-Semismooth newton is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the the function $f(x,y) = \|(x, 2y)\|$.[^semismooth].
-
-
+Semismooth newton is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the function $f(x,y) = \|(x, 2y)\|$.[^semismooth].
 
 
 
