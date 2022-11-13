@@ -206,7 +206,19 @@ There are two reasons to try this:
 First, SuperPolyak is known to work under less restrictive assumptions than semismooth Newton.[^subregularity] 
 
 
-Second, with SuperPolyak, one can sometimes get away with solving significantly smaller linear systems than with semismooth Newton. Indeed, let us compare the linear algebra cost of each iteration of SuperPolyak and semismooth Newton. Both methods must solve a linear system at each step. Semismooth Newton solves a system of size $m \times d$, while SuperPolyak solves a system of size $d \times d$. However, using the [early termination strategies](#practical-improvements-early-termination-of-the-superpolyak-step).
+Second, with SuperPolyak, one can sometimes get away with solving significantly smaller linear systems than with semismooth Newton. Indeed, let us compare the linear algebra cost of each iteration of SuperPolyak and semismooth Newton. Both methods must solve a linear system at each step. Semismooth Newton solves a system of size $m \times d$, while SuperPolyak solves a system of size $d \times d$. However, using the [early termination strategies](#practical-improvements-early-termination-of-the-superpolyak-step), we may solve a substantially smaller system and (sometimes) still maintain superlinear convergence. 
+
+For instance, consider the formulation of [Example 1](#Example-1-Fitting-a-1-hidden-layer-neural-network-with-max-pooling) to which one could apply the semismooth Newton method:
+
+$$
+F(x) := (\max_{j \in [r]} \langle a_i, \beta_j\rangle - y_i)_{i=1}^m
+$$
+
+Thus, each step of semismooth Newton would require solving a $m \times d$ linear system, where $m$ is the number of data points. In contrast, the [early termination strategies of SuperPolyak](#practical-improvements-early-termination-of-the-superpolyak-step) allowed us to solve substantially smaller linear systems with less than $40$ equations.
+
+
+
+
 
 
 # How to use
@@ -234,8 +246,10 @@ An example code.
 
 # References
 
-[0] V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, 2022. URL: https://arxiv.org/abs/2201.04611.
+[0] V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, _Mathematics of Operations Research_, to appear. arXiv: https://arxiv.org/abs/2201.04611.
 
 [1] Qi and Sun
 
 [^semismooth]: This story is somewhat subtle. One could of course reformulate the problem to finding a root of the **smooth** mapping $F(x,y) = (x,2y)$ and apply the standard Newton method, which would converge superlinearly. However, our goal is to treat the loss function $f(x) = \|(x, 2y)\|$ as a blackbox, accessible only through gradient and function evaluations. Under this setting, Newton's method only converges linearly.
+
+[^subregularity]: To the best of our knowledge, without assuming further smoothness properties, superlinear convergence semismooth Newton methods must assume the Jacobian is injective. In contrast, SuperPolyak requires the mapping to be metrically subregular, a weaker property in general.   
