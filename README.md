@@ -117,7 +117,7 @@ Now let's consider an example where the dimension fo the parameter $d$ is greate
 - Construct the tangent approximation of $f$ at the current iterate
 - Declare the next iterate to be the **nearest root** of the tangent approximation.
 
-Here, a qualifier such as **nearest root** is necessary since there are infinitely many roots of the tangent approximation, as shown in the following contour plot, corresponding to the function $f(x,y) = \|(x, 2*y)\|$.
+Here, a qualifier such as **nearest root** is necessary since there are infinitely many roots of the tangent approximation, as shown in the following contour plot, corresponding to the function $f(x,y) = \|(x, 2y)\|$.
 
 ![Performance Plot](figures/newton_2d_onestep.png)
 
@@ -127,7 +127,7 @@ How well does the above Newton's method work? The following animation suggests t
 
 But is the convergence rate still doubly exponential? The following plot shows that it is not. In fact, the convergence rate is only exponential.
 
-![Newton's method 2d convergence plot](figures/newton_2d_linear_only.png)
+![Newton's method 2d convergence plot](figures/newton_function_values.png)
 
 ## SuperPolyak: a method for repairing Newton's method in higher dimensions
 
