@@ -14,14 +14,12 @@ from typing import Callable, Iterable
 class BundleLinearSystemSolver(Enum):
     """Contains the available linear system solvers for PolyakBundle.
 
-    NAIVE: The default numpy least-squares solver.
     LSMR: The SciPy implementation of the LSMR algorithm.
     QR: An incremental QR-based approach using SciPy's `qr_insert`.
     """
 
-    NAIVE = 1
-    LSMR = 2
-    QR = 3
+    LSMR = 1
+    QR = 2
 
 
 class SuperPolyak(Optimizer):
@@ -31,7 +29,7 @@ class SuperPolyak(Optimizer):
         min_f: float = 0.0,
         eta_est: float = 0.1,
         max_elts: int = 1,
-        linsys_solver: BundleLinearSystemSolver = BundleLinearSystemSolver.NAIVE,
+        linsys_solver: BundleLinearSystemSolver = BundleLinearSystemSolver.LSMR,
     ):
         """Initialize the SuperPolyak optimizer.
 
@@ -176,13 +174,7 @@ class SuperPolyak(Optimizer):
             fvals[bundle_idx] = resid[bundle_idx - 1] + bmtrx[bundle_idx, :] @ (
                 y0 - parameters_to_vector(self._params).numpy()
             )
-            if self.linsys_solver is BundleLinearSystemSolver.NAIVE:
-                dy = np.linalg.lstsq(
-                    bmtrx[0 : (bundle_idx + 1), :],
-                    fvals[0 : (bundle_idx + 1)],
-                    rcond=None,
-                )[0]
-            elif self.linsys_solver is BundleLinearSystemSolver.LSMR:
+            if self.linsys_solver is BundleLinearSystemSolver.LSMR:
                 # TODO: Tune tolerances for ATOL, BTOL.
                 dy = lsmr(
                     bmtrx[0 : (bundle_idx + 1), :],
