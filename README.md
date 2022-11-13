@@ -191,6 +191,8 @@ where $G(x_k)$ denotes a "generalized Jacobian" of $F$ at $x_k and $G(x_k)^{\dag
 Semismooth newton is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the function $f(x,y) = \|(x, 2y)\|$.[^semismooth].
 
 
+
+max linear exampldex
 ### A potential benefit of SuperPolyak over semismooth newton
 
 If one is presented with a nonsmooth system of equations $F$ as above, a natural idea is to apply SuperPolyak to 
@@ -204,7 +206,7 @@ There are two reasons to try this:
 First, SuperPolyak is known to work under less restrictive assumptions than semismooth Newton.[^subregularity] 
 
 
-Second, with SuperPolyak, one can sometimes get away with solving significantly smaller linear systems than with semismooth Newton. Indeed, let us compare the linear algebra cost of each iteration of SuperPolyak and semismooth Newton. Both methods must solve a linear system at each step. Semismooth Newton solves a system of size $m \times d$, while SuperPolyak solves a system of size $d \times d$. However, using the [early termination](#1-Practical-improvements:-early-termination-of-the-SuperPolyak-step)
+Second, with SuperPolyak, one can sometimes get away with solving significantly smaller linear systems than with semismooth Newton. Indeed, let us compare the linear algebra cost of each iteration of SuperPolyak and semismooth Newton. Both methods must solve a linear system at each step. Semismooth Newton solves a system of size $m \times d$, while SuperPolyak solves a system of size $d \times d$. However, using the [early termination](#1-practical-improvements:-early-termination-of-the-superpolyak-step)
  strategies outlined in 
 
 
