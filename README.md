@@ -131,25 +131,60 @@ But is the convergence rate still doubly exponential? The following plot shows t
 
 Can we do better?
 
-## SuperPolyak: a method for repairing Newton's method in higher dimensions
+## The SuperPolyak step: a method for repairing Newton's method in higher dimensions
 
 The problem with Newton's method in higher dimensions is that there are infinitely many roots to the tangent approximation: why should we expect that the nearest root is very close to the solution?
 
 SuperPolyak is motivated by the following question:
 > What if we choose the next iterate to be a root of several distinct tangent approximations?
 
-This idea is illustrated in the following animation:
+Since each tangent approximation corresponds to a linear equation, leveraging $d$ "linearly independent" tangent approximations makes the choice of the next iterate less arbitrary and potentially closer to the solution. 
+
+There are infinitely many ways to chose the "several distinct tangent approximations." For example, we could choose the locations randomly. Instead of random, we suggest the following iterative scheme (here $g$ is a "gradient of $f$", e.g., the output of autodifferentiation):
+
+![SuperPolyak explnanation](figures/SuperPolyak_alg_explanation.gif)
+
+Let's take a look at the algorithm in action:
 
 ![SuperPolyak](figures/superpolyak_contour.gif)
 
-This approach works well, and essentially finds the solution in 2 evals of $f$ and its gradient.
+From the above animation, we see the approach works well, essentially finding the solution in two evaluations of $f$ and its gradient:
 
 ![SuperPolyak function values](figures/superpolyak_subgradient_method_function_values.png)
+
+## Practical improvements: early termination of the SuperPolyak step
+
+In [0], we show that SuperPolyak converges superlinearly. However, its Naïve implementation could be prohibitively expensive, since it requires $d$ evaluations of $f$ and its gradient. We've found that this number can be substantially reduced in practice. 
+
+We implement three early termination strategies in SuperPolyak.py, all of which are described in [Section 5.1.1, 0]:
+
+- Fix a maximum per-step budget, called ```max_elt```. Then declare the next iterate to be the best among the first ```max_elt``` points $y_i$.
+- Fix a "superlinear improvement" exponent ```eta_est``` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \texttt{\eta_est}}$. 
+- 
+
+
+
+
+## Why does SuperPolyak work?
+
+The choice construction of the points $y_i$ in SuperPolyak is a bit mysterious. However, under certain conditions that can be found in [0], they lead to the following   
+
+![Why does it work?](figures/whyitworks.gif)
+
+
+
+A couple of questions and answers: 
+- Q: Why stop at $d-1$?
+- A: Our theoretical 
+
+
+
+
+
 
 
 ### The full Algorithm.
 
-![SuperPolyak Explanation](figures/SuperPolyak_alg_explanation.gif)
 
 
 # How to use
