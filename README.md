@@ -157,6 +157,11 @@ From the above animation, we see the approach works well, essentially finding th
 
 ## When does SuperPolyak work?
 
+Two broad families of examples where SuperPolyak works well:
+- Piecewise linear functions, e.g., for $f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langle a_i, \beta_j\rangle|.$
+- 
+
+SuperPolyak works under minimal assumptions known as "sharpness" and "semismoothness."
 
 
 ## Practical improvements: early termination of the SuperPolyak step
@@ -169,7 +174,9 @@ In [0], we show that SuperPolyak converges superlinearly. However, its Naïve im
 
 ## What about semismooth newton?
 
-Semismooth Newton's method [1] is the direct generalization of Newton's method to the case where $f$ is not smooth. It is known to converge superlinearly in several circumstances outlined in [0]. However, for the problems we consider here, it's convergence is at best linear, as we demonstrated on the function $f(x,y) = \|(x, 2y)\|$.
+Semismooth Newton's method is the direct generalization of Newton's method to non-smooth equations. It is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the the function $f(x,y) = \|(x, 2y)\|$[^0]  
+
+
 
 
 # How to use
@@ -200,3 +207,5 @@ An example code.
 [0] V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, 2022. URL: https://arxiv.org/abs/2201.04611.
 
 [1] Qi and Sun
+
+[^0] asdfasdfja;sdkf 
