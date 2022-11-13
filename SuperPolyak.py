@@ -28,7 +28,6 @@ class SuperPolyak(Optimizer):
     def __init__(
         self,
         params: Iterable[torch.Tensor],
-        tau: float = np.inf,
         min_f: float = 0.0,
         eta_est: float = 0.1,
         max_elts: int = 1,
@@ -38,8 +37,6 @@ class SuperPolyak(Optimizer):
 
         Args:
             params (iterable): iterable of parameters to optimize.
-            tau (float, optional): a trust region parameter controlling
-                how far iterates can travel before stopping (default: np.inf).
             min_f (float, optional): A lower bound on the minimal function
                 value (default: 0.0).
             eta_est (float, optional): An estimate of the modulus of
@@ -57,7 +54,6 @@ class SuperPolyak(Optimizer):
         self.loss = np.inf
         self._params = self.param_groups[0]["params"]
         self._numel_cache = None
-        self.tau = tau
         self.min_f = min_f
         self.eta_est = eta_est
         self.max_elts = max_elts
@@ -97,13 +93,6 @@ class SuperPolyak(Optimizer):
         with torch.enable_grad():
             fy = closure().item()
         resid[0] = fy - self.min_f
-        # Exit early if solution escaped ball.
-        if (
-            np.linalg.norm(parameters_to_vector(self._params).numpy() - y0)
-            > self.tau * gap
-        ):
-            vector_to_parameters(torch.from_numpy(y0), self._params)
-            return 1
         # Best solution and function value found so far.
         if fy < fy0:
             y_best = parameters_to_vector(self._params).detach().clone().numpy()
@@ -131,20 +120,13 @@ class SuperPolyak(Optimizer):
                     rcond=None,
                 )[0]
                 print("Bundle matrix is degenerate - terminating.")
-                if np.linalg.norm(dy) > self.tau * gap:
-                    vector_to_parameters(torch.from_numpy(y_best), self._params)
-                else:
-                    vector_to_parameters(torch.from_numpy(y0 - dy), self._params)
+                vector_to_parameters(torch.from_numpy(y0 - dy), self._params)
                 return bundle_idx
             # Update point and function gap.
             vector_to_parameters(torch.from_numpy(y0 - dy), self._params)
             with torch.enable_grad():
                 fy = closure().item()
             resid[bundle_idx] = fy - self.min_f
-            # Terminate early if new point escaped ball around y₀.
-            if np.linalg.norm(dy) > self.tau * gap:
-                vector_to_parameters(torch.from_numpy(y_best), self._params)
-                return bundle_idx
             # Terminate early if function value decreased significantly.
             if (gap < 0.5) and (resid[bundle_idx] < gap ** (1 + self.eta_est)):
                 return bundle_idx
@@ -180,13 +162,6 @@ class SuperPolyak(Optimizer):
         with torch.enable_grad():
             fy = closure().item()
         resid[0] = fy - self.min_f
-        # Exit early if solution escaped ball.
-        if (
-            np.linalg.norm(parameters_to_vector(self._params).numpy() - y0)
-            > self.tau * gap
-        ):
-            vector_to_parameters(torch.from_numpy(y0), self._params)
-            return 1
         # Best solution and function value found so far.
         if fy < fy0:
             y_best = parameters_to_vector(self._params).detach().clone().numpy()
@@ -226,10 +201,6 @@ class SuperPolyak(Optimizer):
             with torch.enable_grad():
                 fy = closure().item()
             resid[bundle_idx] = fy - self.min_f
-            # Terminate early if new point escaped ball around y₀.
-            if np.linalg.norm(dy) > self.tau * gap:
-                vector_to_parameters(torch.from_numpy(y_best), self._params)
-                return bundle_idx
             # Terminate early if function value decreased significantly.
             if (gap < 0.5) and (resid[bundle_idx] < gap ** (1 + self.eta_est)):
                 return bundle_idx
