@@ -156,34 +156,29 @@ From the above animation, we see the approach works well, essentially finding th
 
 In [0], we show that SuperPolyak converges superlinearly. However, its Naïve implementation could be prohibitively expensive, since it requires $d$ evaluations of $f$ and its gradient. We've found that this number can be substantially reduced in practice. 
 
-We implement three early termination strategies in SuperPolyak.py, all of which are described in [Section 5.1.1, 0]:
+We implement two early termination strategies in SuperPolyak.py, both of which are described in [Section 5.1.1, 0]:
 
 - Fix a maximum per-step budget, called ```max_elt```. Then declare the next iterate to be the best among the first ```max_elt``` points $y_i$.
-- Fix a "superlinear improvement" exponent ```eta_est``` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \texttt{eta\{_}est}}$. 
-- 
+- Fix a "superlinear improvement" exponent ```eta_est``` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \eta}$. 
 
 
+[//]: # (## Why does SuperPolyak work?)
 
+[//]: # ()
+[//]: # (The choice construction of the points $y_i$ in SuperPolyak is a bit mysterious. However, under certain conditions that can be found in [0], they lead to the following of alternatives.)
 
-## Why does SuperPolyak work?
+[//]: # ()
+[//]: # (![Why does it work?]&#40;figures/whyitworks.gif&#41;)
 
-The choice construction of the points $y_i$ in SuperPolyak is a bit mysterious. However, under certain conditions that can be found in [0], they lead to the following   
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # (A couple of questions and answers: )
 
-![Why does it work?](figures/whyitworks.gif)
+[//]: # (- Q: Why stop at $d-1$?)
 
+[//]: # (- A: Our theoretical )
 
-
-A couple of questions and answers: 
-- Q: Why stop at $d-1$?
-- A: Our theoretical 
-
-
-
-
-
-
-
-### The full Algorithm.
 
 
 
