@@ -214,6 +214,7 @@ class LassoProblem:
     ):
         self.A = torch.tensor(
             np.linalg.qr(np.random.randn(d, m))[0].T, dtype=torch.double
+            # replace this with a sparse random matrix
         )
         self.x = generate_sparse_vector(d, k)
         self.y = self.A @ self.x + noise_stddev * torch.randn(m, dtype=torch.double)
