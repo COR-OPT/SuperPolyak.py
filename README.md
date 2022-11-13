@@ -226,8 +226,8 @@ Thus, each step of semismooth Newton would require solving a $m \times d$ linear
 # How to use
 
 SuperPolyak can be run in two ways: 
-- Method 1: standalone pytorch optimizer; 
-- Method 2: coupled with another pytorch optimizer.
+- Method 1: [standalone pytorch optimizer](#standalone-optimizer-class); 
+- Method 2: [coupled with another pytorch optimizer](#coupling-with-a-fallback-algorithm-eg-SGD)
 
 ## Standalone optimizer class
 
@@ -243,11 +243,7 @@ It has several additional inputs:
   - ```BundleLinearSystemSolver.LSMR```: a solver based on warm-started conjugate gradient.
   - ```BundleLinearSystemSolver.QR:``` an exact solver based on a compact QR decomposition; see [0] for details.   
 
-In our experiments, we found both ```linsys_solvers``` to have comparable performance.  
-
-
-
-
+In our experiments, we found both ```linsys_solvers``` to have comparable performance.
 
 ## Coupling with a fallback algorithm (e.g. SGD)
 
