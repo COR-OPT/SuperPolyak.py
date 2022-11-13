@@ -7,7 +7,7 @@ A pytorch implementation of the SuperPolyak subgradient method[^superpolyak_refe
 Outline 
 - [What is SuperPolyak?](#what-is-superpolyak)
   - [Problem formulation](#problem-formulation)
-    - [Example 1: Fitting a 1-hidden layer neural network with max-pooling](#example-1-fitting-a-1-hidden-layer-neural-network-with-max-pooling)]
+    - [Example 1: Fitting a 1-hidden layer neural network with max-pooling](#example-1-fitting-a-1-hidden-layer-neural-network-with-max-pooling)
     - [Example 2: Solving a smooth and strongly convex optimization problem](#example-2-solving-a-smooth-and-strongly-convex-optimization-problem)
 - [What is SuperPolyak doing?](#what-is-superpolyak-doing)
   - [Newton's method](#newtons-method)
