@@ -247,7 +247,7 @@ Thus, each step of semismooth Newton would require solving a $m \times d$ linear
 
 SuperPolyak can be run in two ways: 
 - Method 1: [standalone pytorch optimizer](#standalone-optimizer-class); 
-- Method 2: [coupled with another pytorch optimizer](#coupling-with-a-fallback-algorithm-eg-SGD)
+- Method 2: [coupled with another pytorch optimizer](#coupling-with-a-fallback-algorithm-eg-SGD).
 
 ## Standalone optimizer class
 
@@ -266,16 +266,15 @@ In our experiments, we found both ```linsys_solvers``` to have comparable perfor
 
 ## Coupling with a fallback algorithm (e.g. SGD)
 
-The figure from Vasilis presentation with fallback. 
-
-An example code.
+**TODO** Vas fill in this part. No need to add a figure, just add a quick explanation of how it works, possibly with a code fragment.
 
 
 # References
 
 [0] V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, _Mathematics of Operations Research_, to appear. arXiv: https://arxiv.org/abs/2201.04611.
 
-[1] Qi and Sun
+[1] L. Qi, J. Sun. "A nonsmooth version of Newton's method." _Mathematical programming_ 58.1 (1993): 353-367.
+
 
 [^semismooth]: This story is somewhat subtle. One could of course reformulate the problem to finding a root of the **smooth** mapping $F(x,y) = (x,2y)$ and apply the standard Newton method, which would converge superlinearly. However, our goal is to treat the loss function $f(x) = \|(x, 2y)\|$ as a blackbox, accessible only through gradient and function evaluations. Under this setting, Newton's method only converges linearly.
 
