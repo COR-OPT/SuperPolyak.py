@@ -1,6 +1,6 @@
 # Superpolyak.py
 
-A pytorch implementation of the SuperPolyak subgradient method [0].
+A pytorch implementation of the SuperPolyak subgradient method[^superpolyak_reference].
 
 **Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
 
@@ -174,7 +174,23 @@ In [0], we show that SuperPolyak converges superlinearly. However, its Naïve im
 
 ## What about semismooth newton?
 
-Semismooth Newton's method is the direct generalization of Newton's method to non-smooth equations. It is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the the function $f(x,y) = \|(x, 2y)\|$.[^semismooth]  
+Semismooth Newton's method is the direct generalization of Newton's method to systems of nonsmooth systems of equations: 
+
+$$
+F(x) = 0
+$$
+
+where $F \colon \mathbb{R}^d \rightarrow \mathbb{R}^m$. The algorithm iterates
+
+$$
+x_{k+1} = x_k - G(x_k)^{\dag} F(x_k), 
+$$
+
+where $G$ denotes a "generalized Jacobian" of $F$ and $G(x_k)^{\dag}$ denotes the Moore-Penrose pseudoinverse $x_k$. 
+
+Semismooth newton is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the the function $f(x,y) = \|(x, 2y)\|$.[^semismooth].
+
+
 
 
 
