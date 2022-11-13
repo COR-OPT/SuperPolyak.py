@@ -174,7 +174,7 @@ In [0], we show that SuperPolyak converges superlinearly. However, its Naïve im
 
 ## What about semismooth newton?
 
-Semismooth Newton's method is the direct generalization of Newton's method to non-smooth equations. It is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the the function $f(x,y) = \|(x, 2y)\|$.[^0]  
+Semismooth Newton's method is the direct generalization of Newton's method to non-smooth equations. It is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the the function $f(x,y) = \|(x, 2y)\|$.[^1]  
 
 
 
@@ -208,4 +208,4 @@ An example code.
 
 [1] Qi and Sun
 
-[^0] asdfasdfja;sdkf 
+[^1] asdfasdfja;sdkf 
