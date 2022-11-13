@@ -233,8 +233,14 @@ SuperPolyak can be run in two ways:
 ## Standalone optimizer class
 
 SuperPolyak inherits from the pytorch optimizer class. It has several options. 
-- max_elts: The size of the bundle.
-- ...
+- ```max_elts```: The size of the bundle.
+- ```eta_est```: 
+
+[Description of the SuperPolyak step](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions)
+
+
+
+
 
 ### What a single step does (and what are the options)
 
