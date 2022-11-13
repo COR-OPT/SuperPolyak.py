@@ -169,7 +169,7 @@ More formally, SuperPolyak works under minimal assumptions known as "sharpness" 
 
 ## Practical improvements: early termination of the SuperPolyak step
 
-In [0], we show that SuperPolyak converges superlinearly. However, its Naïve implementation could be prohibitively expensive, since it requires $d$ evaluations of $f$ and its gradient. We've found that this number can be substantially reduced in practice. For instance, in example 1, the total number of iterations is much less than $d = 500$. To achieve this, we implement two early termination strategies, in SuperPolyak.py, both of which are described in [Section 5.1.1, 0]:
+In [0], we show that SuperPolyak converges superlinearly. However, its Naïve implementation could be prohibitively expensive, since it requires $d$ evaluations of $f$ and its gradient. We've found that this number can be substantially reduced in practice. For instance, in [Example 1](#Example-1-Fitting-a-1-hidden-layer-neural-network-with-max-pooling), the total number of iterations is much less than $d = 500$. To achieve this, we implement two early termination strategies, in SuperPolyak.py, both of which are described in [Section 5.1.1, 0]:
 
 - Fix a maximum per-step budget, called ```max_elt```. Then declare the next iterate to be the best among the first ```max_elt``` points $y_i$.
 - Fix a "superlinear improvement" exponent ```eta_est``` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \eta}$. 
@@ -195,8 +195,7 @@ Semismooth newton is known to converge superlinearly in several circumstances ou
 
 
 
-max linear exampldex
-### A potential benefit of SuperPolyak over semismooth newton
+### A potential benefit of SuperPolyak over semismooth Newton
 
 If one is presented with a nonsmooth system of equations $F$ as above, a natural idea is to apply SuperPolyak to 
 
@@ -232,19 +231,23 @@ SuperPolyak can be run in two ways:
 
 ## Standalone optimizer class
 
-SuperPolyak inherits from the pytorch optimizer class. It has several options. 
-- ```max_elts```: The size of the bundle.
-- ```eta_est```: 
-
-[Description of the SuperPolyak step](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions)
 
 
+SuperPolyak inherits from the pytorch optimizer class. 
+It implements 
+[a single step of the algorithm](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions).
+It has several additional inputs:
+- ```max_elts```: The maximal size of the linear system to solve at each step.
+- ```eta_est```: Exit early if some $y_i$ satisfies $f(y_i) \leq f(y_0)^{1+ \eta}$.
+- ```linsys_solver```: how to solve the linear system at each step. 
+  - ```BundleLinearSystemSolver.LSMR```: a solver based on warm-started conjugate gradient.
+  - ```BundleLinearSystemSolver.QR:``` an exact solver based on a compact QR decomposition; see [0] for details.   
+
+In our experiments, we found both ```linsys_solvers``` to have comparable performance.  
 
 
 
-### What a single step does (and what are the options)
 
-Animation of algorithm from paper.
 
 ## Coupling with a fallback algorithm (e.g. SGD)
 
