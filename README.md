@@ -257,7 +257,7 @@ SuperPolyak can be run in two ways:
 ## Standalone optimizer class
 
 
-SuperPolyak inherits from the pytorch optimizer class.
+SuperPolyak inherits from the [pytorch optimizer class](https://pytorch.org/docs/stable/optim.html).
 It implements
 [a single step of the algorithm](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions).
 It has several additional inputs:
