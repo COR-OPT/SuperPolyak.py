@@ -1,6 +1,6 @@
 # Superpolyak.py
 
-A pytorch implementation of the SuperPolyak subgradient method[^superpolyak_reference].
+A pytorch implementation of the SuperPolyak subgradient method [[1]](#1).
 
 **Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
 
@@ -25,7 +25,7 @@ Outline
 # What is SuperPolyak?
 
 ## Problem formulation
- SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
+SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
 
 $$
 f(\bar x) = 0 \qquad \iff \qquad  \min f(x)
@@ -190,15 +190,15 @@ Two broad families of examples where SuperPolyak locally converges superlinearly
   $$f_v = \|F(x) - v\|,$$
   where $F$ is a "semialgebraic mapping" and $v$ is a "generic right-hand-side" vector.
 
-More formally, SuperPolyak works under minimal assumptions known as "sharpness" and "semismoothness;" see [0] for a formal discussion.
+More formally, SuperPolyak works under minimal assumptions known as "sharpness" and "semismoothness;" see [[1]](#1) for a formal discussion.
 
 
 ## Practical improvements: early termination of the SuperPolyak step
 
-In [0], we show that SuperPolyak converges superlinearly. However, its naïve implementation could be prohibitively expensive,
+In [[1]](#1), we show that SuperPolyak converges superlinearly. However, its naïve implementation could be prohibitively expensive,
 since it requires $d$ evaluations of $f$ and its gradient. We've found that this number can be substantially reduced in practice.
 For instance, in [Example 1](#Example-1-Fitting-a-1-hidden-layer-neural-network-with-max-pooling), the total number of iterations
-is much less than $d = 500$. To achieve this, we implement two early termination strategies, in SuperPolyak.py, both of which are described in [Section 5.1.1, 0]:
+is much less than $d = 500$. To achieve this, we implement two early termination strategies, in SuperPolyak.py, both of which are described in Section 5.1.1 of [[1]](#1):
 
 - Fix a maximum per-step budget, called `max_elt`. Then declare the next iterate to be the best among the first `max_elt` points $y_i$.
 - Fix a "superlinear improvement" exponent `eta_est` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \eta}$.
@@ -220,9 +220,8 @@ $$
 
 where $G(x_k)$ denotes a "generalized Jacobian" of $F$ at $x_k$ and $G(x_k)^{\dagger}$ denotes its Moore-Penrose pseudoinverse.
 
-Semismooth newton is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the function $f(x,y) = \|(x, 2y)\|$.[^semismooth].
-
-**TODO:** Vas help me fix the dagger command.
+Semismooth newton is known to converge superlinearly in several circumstances outlined in [[1](#1), [2](#2)].
+However, for the problems we consider in [[1]](#1), it converges at most linearly, as we saw for the function $f(x,y) = \|(x, 2y)\|$.[^semismooth].
 
 ### Potential benefits of SuperPolyak over semismooth Newton
 
@@ -245,7 +244,9 @@ $$
 F(x) := (\max_{j \in [r]} \langle a_i, \beta_j\rangle - y_i)_{i=1}^m
 $$
 
-Thus, each step of semismooth Newton would require solving a $m \times d$ linear system, where $m$ is the number of data points. In contrast, the [early termination strategies of SuperPolyak](#practical-improvements-early-termination-of-the-superpolyak-step) allowed us to solve substantially smaller linear systems with less than $40$ equations.
+Thus, each step of semismooth Newton would require solving a $m \times d$ linear system, where $m$ is the number of data points.
+In contrast, the [early termination strategies of SuperPolyak](#practical-improvements-early-termination-of-the-superpolyak-step)
+allowed us to solve substantially smaller linear systems with less than $40$ equations.
 
 # How to use
 
@@ -264,20 +265,61 @@ It has several additional inputs:
 - `eta_est`: Exit early if some $y_i$ satisfies $f(y_i) \leq f(y_0)^{1+\eta}$.
 - `linsys_solver`: how to solve the linear system at each step.
   - `BundleLinearSystemSolver.LSMR`: a solver based on warm-started conjugate gradient.
-  - `BundleLinearSystemSolver.QR:` an exact solver based on a compact QR decomposition; see [0] for details.
+  - `BundleLinearSystemSolver.QR:` an exact solver based on a compact QR decomposition; see [[1]](#1) for details.
 
 In our experiments, we found both `linsys_solvers` to have comparable performance.
 
 ## Coupling with a fallback algorithm (e.g. SGD)
 
-**TODO** Vas fill in this part. No need to add a figure, just add a quick explanation of how it works, possibly with a code fragment.
+In several applications, it may be desirable to use SuperPolyak to accelerate an
+existing optimizer such as SGD. For that purpose, we provide a utility function
+that couples SuperPolyak with an arbitrary "fallback" method, implemented as a
+class that inherits from `torch.optim.Optimizer`. Its signature is as follows:
 
+```python
+def superpolyak_coupled_with_fallback(
+  superpolyak_closure: Callable,
+  fallback_closure: Callable,
+  superpolyak_optimizer: SuperPolyak,
+  fallback_optimizer: Optimizer,
+  max_inner_iter: int,
+  max_outer_iter: int,
+  mult_factor: float = 0.5,
+  tol: float = 1e-16,
+  verbose: bool = False,
+  metric_to_print: Optional[Callable] = None,
+) -> Tuple[Sequence[int], Sequence[float]]
+```
+
+This function runs for `max_outer_iter` steps. At each step, it attempts a `SuperPolyak`
+step equivalent to
+
+```python
+>>> superpolyak_optimizer.step(superpolyak_closure)
+```
+
+If this step reduces the loss by at least `mult_factor`, the function proceeds to the
+next step. Otherwise, it calls
+
+```python
+fallback_optimizer.step(fallback_closure)
+```
+
+for at most `max_inner_iter` steps before attempting a new `SuperPolyak` step.
+
+The function terminates if `max_outer_iter` steps of the above have elapsed,
+or if the loss (as measured by the output of `superpolyak_closure()`) drops
+below `tol` at any given iteration. Upon termination, the function returns
+a list containing the cumulative number of calls to the autodifferentiation
+oracles as well as list containing the objective function value at each step.
+
+An example of using `superpolyak_coupled_with_fallback` is given in [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
 
 # References
 
-[0] V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, _Mathematics of Operations Research_, to appear. arXiv: https://arxiv.org/abs/2201.04611.
+<a id="1">[1]</a>: V. Charisopoulos, D. Davis. A superlinearly convergent subgradient method for sharp semismooth problems, _Mathematics of Operations Research_, to appear. arXiv: https://arxiv.org/abs/2201.04611.
 
-[1] L. Qi, J. Sun. "A nonsmooth version of Newton's method." _Mathematical programming_ 58.1 (1993): 353-367.
+<a id="2">[2]</a>: L. Qi, J. Sun. "A nonsmooth version of Newton's method." _Mathematical programming_ 58.1 (1993): 353-367.
 
 
 [^semismooth]: This story is somewhat subtle. One could of course reformulate the problem to finding a root of the **smooth** mapping $F(x,y) = (x,2y)$ and apply the standard Newton method, which would converge superlinearly. However, our goal is to treat the loss function $f(x) = \|(x, 2y)\|$ as a blackbox, accessible only through gradient and function evaluations. Under this setting, Newton's method only converges linearly.
