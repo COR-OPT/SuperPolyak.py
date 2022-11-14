@@ -4,7 +4,7 @@ A pytorch implementation of the SuperPolyak subgradient method[^superpolyak_refe
 
 **Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
 
-Outline 
+Outline
 - [What is SuperPolyak?](#what-is-superpolyak)
   - [Problem formulation](#problem-formulation)
     - [Example 1: Fitting a 1-hidden layer neural network with max-pooling](#example-1-fitting-a-1-hidden-layer-neural-network-with-max-pooling)
@@ -15,7 +15,7 @@ Outline
   - [The SuperPolyak step: a method for repairing Newton's method in higher dimensions](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions)
   - [Practical improvements: early termination of the SuperPolyak step](#practical-improvements-early-termination-of-the-superpolyak-step)
   - [When does SuperPolyak work?](#when-does-superpolyak-work)
-  - [Comparison to semismooth Newton](#what-about-semismooth-newton)
+  - [Comparison to semismooth Newton](#comparison-to-semismooth-newton)
     - [Potential benefits of SuperPolyak over semismooth Newton](#potential-benefits-of-superpolyak-over-semismooth-newton)
 - [How to use](#how-to-use)
   - [Standalone optimizer class](#standalone-optimizer-class)
@@ -24,11 +24,11 @@ Outline
 
 # What is SuperPolyak?
 
-## Problem formulation 
+## Problem formulation
  SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
 
 $$
-f(\bar x) = 0 \qquad \iff \qquad  \min f(x) 
+f(\bar x) = 0 \qquad \iff \qquad  \min f(x)
 $$
 
 where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$. When certain **minimal assumptions** are met, SuperPolyak locally converges **superlinearly** (i.e., "double exponentially").
@@ -46,22 +46,23 @@ $$
 The network has $d$ parameters, $r$ hidden units, and $m$ data samples. Concretely, we want to solve the $m$ equations for weights $\beta_j$:
 
 $$
-\max_{j \in [r]} \langle a_i, \beta_j\rangle = y_i \qquad i \in [m]  
+\max_{j \in [r]} \langle a_i, \beta_j\rangle = y_i \qquad i \in [m]
 $$
 
-We reformulate this as a root finding problem: 
+We reformulate this as a root finding problem:
 
 $$
 \text{Find a root of } f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langle a_i, \beta_j\rangle|.
 $$
 
 Now let's do a quick experiment:
-- **Setup:** 
+- **Setup:**
   - We use Gaussian data.
   - We set $d = 500$, vary $r$, and set $m = 3dr$.
-  - We run SuperPolyak and a standard first-order method (Polyak). 
-- **Conclusion:** 
+  - We run SuperPolyak and a standard first-order method (Polyak).
+- **Conclusion:**
   - Superpolyak outperforms Polyak both in terms of time and oracle calls (evals of $f$ and its gradient).
+
 ![Performance Plot](figures/max_linear_regression.png)
 
 ### Example 2: Solving a smooth and strongly convex optimization problem
@@ -69,7 +70,7 @@ Now let's do a quick experiment:
 Let's try to solve the following optimization problem:
 
 $$
-\min l(x) 
+\min l(x)
 $$
 
 where $l$ is a smooth and strongly convex function. If $l$ is nonnegative, we can apply SuperPolyak to $l$. Otherwise, we reformulate it via first-order optimality conditions (due to convexity):
@@ -85,7 +86,9 @@ $$
 $$
 
 **TODO:** Vas please make a pretty plot like the above for logistic regression.
+
 **TODO** Need newton's method
+
 - **Setup:**
   - We fit a logistic regression model with l2 regularization to Gaussian data.
   - We vary the dimension $d$ and the number of parameters $m$.
@@ -94,11 +97,11 @@ $$
   - Superpolyak outperforms both methods both in terms of time and oracle calls (evals of $f$ and its gradient)?
 
 
-# What is SuperPolyak doing? 
+# What is SuperPolyak doing?
 
-SuperPolyak is inspired by _Newton's method_, which is taught in first-year calculus. 
+SuperPolyak is inspired by _Newton's method_, which is taught in first-year calculus.
 
-## Newton's method 
+## Newton's method
 Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
 
 - Construct the tangent approximation of $f$ at the current iterate
@@ -133,7 +136,7 @@ k		2^{-2^{k}}
 
 ## Slow-down of Newton's method in higher dimensions
 
-Now let's consider an example where the dimension fo the parameter $d$ is greater than 1. In this setting, Newton's method is defined similarly, but with a key difference, highlighted in bold:
+Now let's consider an example where the dimension $d$ is greater than 1. In this setting, Newton's method is defined similarly, but with a key difference, highlighted in bold:
 
 - Construct the tangent approximation of $f$ at the current iterate
 - Declare the next iterate to be the **nearest root** of the tangent approximation.
@@ -160,9 +163,9 @@ In the interest of fixing this, we ask the following simple question:
 
 > What if we choose the next iterate to be a root of several distinct tangent approximations?
 
-For example, suppose we could find $d$ "linearly independent" tangent approximations. Then the choice of the next iterate could simply be the intersection, which is unique. 
+For example, suppose we could find $d$ "linearly independent" tangent approximations. Then the choice of the next iterate could simply be the intersection, which is unique.
 
-There are infinitely many ways to choose the "several distinct tangent approximations." For example, we could choose the locations randomly or sampled from the past history of the algorithm. 
+There are infinitely many ways to choose the "several distinct tangent approximations." For example, we could choose the locations randomly or sampled from the past history of the algorithm.
 
 Instead of random, we suggest the following iterative scheme (here $g$ is a "gradient of $f$", e.g., the output of autodifferentiation):
 
@@ -179,26 +182,31 @@ From the above animation, we see the approach works well, essentially finding th
 ## When does SuperPolyak work?
 
 Two broad families of examples where SuperPolyak locally converges superlinearly:
-- Piecewise linear functions, e.g., for 
-$$f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langle a_i, \beta_j\rangle|.$$
+
+- Piecewise linear functions, e.g., for
+  $$f(\beta_1, \ldots, \beta_r) = \frac{1}{m} \sum_{i=1}^m |y_i - \max_{j \in [r]} \langle a_i, \beta_j\rangle|.$$
+
 - Generic semialgebraic mappings, e.g., for
-$$f_v = \|F(x) - v\|,$$
-where $F$ is a "semialgebraic mapping" and $v$ is a "generic right-hand-side" vector.
+  $$f_v = \|F(x) - v\|,$$
+  where $F$ is a "semialgebraic mapping" and $v$ is a "generic right-hand-side" vector.
 
 More formally, SuperPolyak works under minimal assumptions known as "sharpness" and "semismoothness;" see [0] for a formal discussion.
 
 
 ## Practical improvements: early termination of the SuperPolyak step
 
-In [0], we show that SuperPolyak converges superlinearly. However, its Naïve implementation could be prohibitively expensive, since it requires $d$ evaluations of $f$ and its gradient. We've found that this number can be substantially reduced in practice. For instance, in [Example 1](#Example-1-Fitting-a-1-hidden-layer-neural-network-with-max-pooling), the total number of iterations is much less than $d = 500$. To achieve this, we implement two early termination strategies, in SuperPolyak.py, both of which are described in [Section 5.1.1, 0]:
+In [0], we show that SuperPolyak converges superlinearly. However, its naïve implementation could be prohibitively expensive,
+since it requires $d$ evaluations of $f$ and its gradient. We've found that this number can be substantially reduced in practice.
+For instance, in [Example 1](#Example-1-Fitting-a-1-hidden-layer-neural-network-with-max-pooling), the total number of iterations
+is much less than $d = 500$. To achieve this, we implement two early termination strategies, in SuperPolyak.py, both of which are described in [Section 5.1.1, 0]:
 
-- Fix a maximum per-step budget, called ```max_elt```. Then declare the next iterate to be the best among the first ```max_elt``` points $y_i$.
-- Fix a "superlinear improvement" exponent ```eta_est``` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \eta}$. 
+- Fix a maximum per-step budget, called `max_elt`. Then declare the next iterate to be the best among the first `max_elt` points $y_i$.
+- Fix a "superlinear improvement" exponent `eta_est` and exist as soon as one finds a point $y_i$ such that $f(y_i) \leq f(y_0)^{1+ \eta}$.
 
 
-## Comparison semismooth newton?
+## Comparison to semismooth Newton
 
-Semismooth Newton's method is the direct generalization of Newton's method to systems of nonsmooth systems of equations: 
+Semismooth Newton's method is the direct generalization of Newton's method to systems of nonsmooth systems of equations:
 
 $$
 F(x) = 0
@@ -207,10 +215,10 @@ $$
 where $F \colon \mathbb{R}^d \rightarrow \mathbb{R}^m$. The algorithm iterates
 
 $$
-x_{k+1} = x_k - G(x_k)^{\dag} F(x_k), 
+x_{k+1} = x_k - G(x_k)^{\dagger} F(x_k),
 $$
 
-where $G(x_k)$ denotes a "generalized Jacobian" of $F$ at $x_k and $G(x_k)^{\dag}$ denotes its Moore-Penrose pseudoinverse.
+where $G(x_k)$ denotes a "generalized Jacobian" of $F$ at $x_k$ and $G(x_k)^{\dagger}$ denotes its Moore-Penrose pseudoinverse.
 
 Semismooth newton is known to converge superlinearly in several circumstances outlined in [0, 1]. However, for the problems we consider in [0], it converges at most linearly, as we saw for the function $f(x,y) = \|(x, 2y)\|$.[^semismooth].
 
@@ -218,18 +226,18 @@ Semismooth newton is known to converge superlinearly in several circumstances ou
 
 ### Potential benefits of SuperPolyak over semismooth Newton
 
-If one is presented with a nonsmooth system of equations $F$ as above, a natural idea is to apply SuperPolyak to 
+If one is presented with a nonsmooth system of equations $F$ as above, a natural idea is to apply SuperPolyak to
 
 $$
 f(x) = \|F(x)\|.
 $$
 
-There are two reasons to try this: 
+There are two reasons to try this:
 
-First, SuperPolyak is known to work under less restrictive assumptions than semismooth Newton.[^subregularity] 
+First, SuperPolyak is known to work under less restrictive assumptions than semismooth Newton.[^subregularity]
 
 
-Second, with SuperPolyak, one can sometimes get away with solving significantly smaller linear systems than with semismooth Newton. Indeed, let us compare the linear algebra cost of each iteration of SuperPolyak and semismooth Newton. Both methods must solve a linear system at each step. Semismooth Newton solves a system of size $m \times d$, while SuperPolyak solves a system of size $d \times d$. However, using the [early termination strategies](#practical-improvements-early-termination-of-the-superpolyak-step), we may solve a substantially smaller system and (sometimes) still maintain superlinear convergence. 
+Second, with SuperPolyak, one can sometimes get away with solving significantly smaller linear systems than with semismooth Newton. Indeed, let us compare the linear algebra cost of each iteration of SuperPolyak and semismooth Newton. Both methods must solve a linear system at each step. Semismooth Newton solves a system of size $m \times d$, while SuperPolyak solves a system of size $d \times d$. However, using the [early termination strategies](#practical-improvements-early-termination-of-the-superpolyak-step), we may solve a substantially smaller system and (sometimes) still maintain superlinear convergence.
 
 For instance, consider the formulation of [Example 1](#Example-1-Fitting-a-1-hidden-layer-neural-network-with-max-pooling) to which one could apply the semismooth Newton method:
 
@@ -239,31 +247,26 @@ $$
 
 Thus, each step of semismooth Newton would require solving a $m \times d$ linear system, where $m$ is the number of data points. In contrast, the [early termination strategies of SuperPolyak](#practical-improvements-early-termination-of-the-superpolyak-step) allowed us to solve substantially smaller linear systems with less than $40$ equations.
 
-
-
-
-
-
 # How to use
 
-SuperPolyak can be run in two ways: 
-- Method 1: [standalone pytorch optimizer](#standalone-optimizer-class); 
+SuperPolyak can be run in two ways:
+- Method 1: [standalone pytorch optimizer](#standalone-optimizer-class);
 - Method 2: [coupled with another pytorch optimizer](#coupling-with-a-fallback-algorithm-eg-SGD).
 
 ## Standalone optimizer class
 
 
-SuperPolyak inherits from the pytorch optimizer class. 
-It implements 
+SuperPolyak inherits from the pytorch optimizer class.
+It implements
 [a single step of the algorithm](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions).
 It has several additional inputs:
-- ```max_elts```: The maximal size of the linear system to solve at each step.
-- ```eta_est```: Exit early if some $y_i$ satisfies $f(y_i) \leq f(y_0)^{1+ \eta}$.
-- ```linsys_solver```: how to solve the linear system at each step. 
-  - ```BundleLinearSystemSolver.LSMR```: a solver based on warm-started conjugate gradient.
-  - ```BundleLinearSystemSolver.QR:``` an exact solver based on a compact QR decomposition; see [0] for details.   
+- `max_elts`: The maximal size of the linear system to solve at each step.
+- `eta_est`: Exit early if some $y_i$ satisfies $f(y_i) \leq f(y_0)^{1+\eta}$.
+- `linsys_solver`: how to solve the linear system at each step.
+  - `BundleLinearSystemSolver.LSMR`: a solver based on warm-started conjugate gradient.
+  - `BundleLinearSystemSolver.QR:` an exact solver based on a compact QR decomposition; see [0] for details.
 
-In our experiments, we found both ```linsys_solvers``` to have comparable performance.
+In our experiments, we found both `linsys_solvers` to have comparable performance.
 
 ## Coupling with a fallback algorithm (e.g. SGD)
 
@@ -279,4 +282,4 @@ In our experiments, we found both ```linsys_solvers``` to have comparable perfor
 
 [^semismooth]: This story is somewhat subtle. One could of course reformulate the problem to finding a root of the **smooth** mapping $F(x,y) = (x,2y)$ and apply the standard Newton method, which would converge superlinearly. However, our goal is to treat the loss function $f(x) = \|(x, 2y)\|$ as a blackbox, accessible only through gradient and function evaluations. Under this setting, Newton's method only converges linearly.
 
-[^subregularity]: To the best of our knowledge, without assuming further smoothness properties, superlinear convergence semismooth Newton methods must assume the Jacobian is injective. In contrast, SuperPolyak requires the mapping to be metrically subregular, a weaker property in general.   
+[^subregularity]: To the best of our knowledge, without assuming further smoothness properties, superlinear convergence semismooth Newton methods must assume the Jacobian is injective. In contrast, SuperPolyak requires the mapping to be metrically subregular, a weaker property in general.
