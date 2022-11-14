@@ -302,7 +302,7 @@ If this step reduces the loss by at least `mult_factor`, the function proceeds t
 next step. Otherwise, it calls
 
 ```python
-fallback_optimizer.step(fallback_closure)
+>>> fallback_optimizer.step(fallback_closure)
 ```
 
 for at most `max_inner_iter` steps before attempting a new `SuperPolyak` step.
