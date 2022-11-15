@@ -4,8 +4,22 @@ from torch import Tensor
 from torch.nn.functional import normalize
 import numpy as np
 
-from util import generate_sparse_vector
 from typing import Optional
+
+
+def generate_sparse_vector(d: int, k: int) -> torch.Tensor:
+    """Generate a random sparse vector with unit norm.
+
+    Args:
+        d (int): The dimension of the vector.
+        k (int): The number of nonzero elements.
+
+    Returns:
+        torch.Tensor: A float64 tensor.
+    """
+    x = np.zeros(d)
+    x[np.random.choice(range(d), size=k, replace=False)] = np.random.randn(k)
+    return torch.tensor(x / np.linalg.norm(x), dtype=torch.double)
 
 
 class ReluRegressionProblem:

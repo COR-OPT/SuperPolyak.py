@@ -1,7 +1,5 @@
 import torch
-from functools import reduce
 from torch.optim.optimizer import Optimizer
-import numpy as np
 
 # Modified from https://github.com/pytorch/pytorch/blob/master/torch/optim/lbfgs.py
 
@@ -25,7 +23,7 @@ class AlternatingProjections(Optimizer):
 
         Arguments:
             closure (callable): A closure that reevaluates the model
-                and returns the loss.
+                and returns the loss (default: None).
         """
         assert len(self.param_groups) == 1
 

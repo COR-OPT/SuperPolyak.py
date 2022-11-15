@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "superpolyak"
+version = "0.1"
+authors = [
+	{ name = "Vasilis Charisopoulos", email = "vc333@cornell.edu" },
+	{ name = "Damek Davis", email = "dsd95@cornell.edu" },
+]
+description = "A prototype Pytorch implementation of SuperPolyak."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+	"Programming Language :: Python :: 3",
+	"License :: OSI Approved :: MIT License",
+	"Operating System :: OS Independent"
+]
+dependencies = [
+	"numpy>=1.22.1",
+	"scipy>=1.8.0",
+	"torch>=1.13.0",
+]
+
+[project-urls]
+"Homepage" = "https://github.com/COR-OPT/superpolyak.py"
+"Bug Tracker" = "https://github.com/COR-OPT/superpolyak.py/issues"

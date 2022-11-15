@@ -1,10 +1,9 @@
 from typing import Callable, Optional
 
-import numpy as np
-import SuperPolyak
-
 import torch
 from torch.optim import Optimizer
+
+from .superpolyak import SuperPolyak
 
 
 def _set_param(param_original, params_new):
@@ -25,7 +24,7 @@ def _tol_reached_msg(oracle_calls: int, loss: float):
 def superpolyak_coupled_with_fallback(
     superpolyak_closure: Callable,
     fallback_closure: Callable,
-    superpolyak_optimizer: SuperPolyak.SuperPolyak,
+    superpolyak_optimizer: SuperPolyak,
     fallback_optimizer: Optimizer,
     max_inner_iter: int,
     max_outer_iter: int,
@@ -34,6 +33,33 @@ def superpolyak_coupled_with_fallback(
     verbose: bool = False,
     metric_to_print: Optional[Callable] = None,
 ):
+    """Couple the superpolyak optimizer with an arbitrary fallback method.
+
+    Args:
+        superpolyak_closure (callable): The closure to use with superpolyak.
+        fallback_closure (callable): The closure to use with the fallback method.
+        superpolyak_optimizer (SuperPolyak): An instance of the superpolyak
+            optimizer.
+        fallback_optimizer (torch.optim.Optimizer): An instance of an optimizer
+            implementing the fallback method.
+        max_inner_iter (int): The number of fallback steps to run after a step
+            of superpolyak that did not sufficiently reduce the loss.
+        max_outer_iter (int): The number of attempted superpolyak steps.
+        mult_factor (float): A factor in (0, 1) determining sufficient decrease
+            in loss (default: 0.5).
+        tol (float): Numerical tolerance; if the loss falls below this number,
+            the method terminates (default: 1e-16).
+        verbose (bool): If set, logs information about the method's progress
+            across each iteration (default: False).
+        metric_to_print (callable): A function returning a metric of interest
+            that is logged if `verbose == True` (default: None).
+
+    Returns:
+        oracle_calls (Sequence[int]): A list containing the cumulative calls to
+            autodifferentiation oracles at each step of the algorithm.
+        loss_list (Sequence[float]): A list containing the loss function value
+            at each step of the algorithm.
+    """
     def _get_metric_msg():
         return f", Metric = {metric_to_print()}" if metric_to_print is not None else ""
 
@@ -41,7 +67,7 @@ def superpolyak_coupled_with_fallback(
     loss_list = [loss]
     oracle_calls = [0]
     cloned_param = _clone_param(superpolyak_optimizer._params)
-    for k_outer in range(max_outer_iter):
+    for _ in range(max_outer_iter):
         loss = loss_list[-1]
         if loss < tol:
             if verbose:
@@ -95,18 +121,3 @@ def superpolyak_coupled_with_fallback(
                 return oracle_calls, loss_list
         _set_param(cloned_param, superpolyak_optimizer._params)
     return oracle_calls, loss_list
-
-
-def generate_sparse_vector(d: int, k: int) -> torch.Tensor:
-    """Generate a random sparse vector with unit norm.
-
-    Args:
-        d (int): The dimension of the vector.
-        k (int): The number of nonzero elements.
-
-    Returns:
-        torch.Tensor: A float64 tensor.
-    """
-    x = np.zeros(d)
-    x[np.random.choice(range(d), size=k, replace=False)] = np.random.randn(k)
-    return torch.tensor(x / np.linalg.norm(x), dtype=torch.double)

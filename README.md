@@ -6,14 +6,16 @@ $$
 f(\bar x) = 0 \qquad \iff \qquad  \min f(x)
 $$
 
-where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$. 
+where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$.
 
 SuperPolyak is an unusual first-order method in that when certain **minimal assumptions** are met, it locally converges **superlinearly** (i.e., "double exponentially").
 
-**Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
+**Installation**:
+
+**Quick demo:** [SuperPolyakDemo.ipynb](examples/SuperPolyakDemo.ipynb).
 
 **Outline:**
-- [Two Quick Exmaples](#two-quick-examples)
+- [Two Quick Examples](#two-quick-examples)
   - [Example 1: Fitting a 1-hidden layer neural network with max-pooling](#example-1-fitting-a-1-hidden-layer-neural-network-with-max-pooling)
   - [Example 2: Solving a smooth and strongly convex optimization problem](#example-2-solving-a-smooth-and-strongly-convex-optimization-problem)
 - [What is SuperPolyak doing?](#what-is-superpolyak-doing)
@@ -28,6 +30,15 @@ SuperPolyak is an unusual first-order method in that when certain **minimal assu
   - [Standalone optimizer class](#standalone-optimizer-class)
   - [Coupling with a fallback algorithm (e.g. SGD)](#coupling-with-a-fallback-algorithm-eg-sgd)
 - [References](#references)
+
+# Installation
+Currently, the only way to install `SuperPolyak` is to `git clone` this repository and install it (via `pip` or `conda`). We will make it available via PyPI soon.
+
+## Example installation using `pip`
+```shell
+$ git clone https://VHarisop/SuperPolyak.py.git
+$ python -m pip install -e .
+```
 
 # Two quick examples
 
@@ -88,11 +99,11 @@ Now let's do a quick experiment:
   - We vary the dimension $d$ and fix the number of parameters $m$.
   - We run SuperPolyak and Newton's method, where the linear system is solved with a conjugate gradient method.
 - **Conclusion:**
-  - Superpolyak offers comparable performance to NewtonCG: 
-    - SuperPolyak used slightly more oracle calls; 
+  - Superpolyak offers comparable performance to NewtonCG:
+    - SuperPolyak used slightly more oracle calls;
     - SuperPolyak took slightly less time.
 
-![SuperPolyak VS NewtonCG](figures/SuperPolyakVSNewtonCG.png) 
+![SuperPolyak VS NewtonCG](figures/SuperPolyakVSNewtonCG.png)
 ```
 d	SuperPolyak time (s)	NewtonCG time (s)
 -------------------------------------------------
@@ -101,7 +112,7 @@ d	SuperPolyak time (s)	NewtonCG time (s)
 100000	3.3524928092956543	4.931229829788208
 ```
 
-**Note:** we tried to use [existing implementations of NewtonCG](https://github.com/rfeinman/pytorch-minimize), but for the scale of problems considered here, we could not decrease the norm of the gradient to machine tolerance. Thus, [we implemented our own version of NewtonCG](newtoncg.py); it performs on par with existing implementations.
+**Note:** we tried to use [existing implementations of NewtonCG](https://github.com/rfeinman/pytorch-minimize), but for the scale of problems considered here, we could not decrease the norm of the gradient to machine tolerance. Thus, [we implemented our own version of NewtonCG](src/superpolyak/newtoncg.py); it performs on par with existing implementations.
 
 # What is SuperPolyak doing?
 
@@ -268,7 +279,7 @@ It implements
 [a single step of the algorithm](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions).
 It has several additional inputs:
 - `max_elts`: The maximal size of the linear system to solve at each step.
-- `eta_est`: Exit early if some $y_i$ satisfies $f(y_i) \leq f(y_0)^{1+\eta}$.
+- `eta_est`: Exit early if some $y_i$ satisfies $f(y_i) \leq f(y_0)^{1+\eta}$, with $\eta$ equal to `eta_est`.
 - `linsys_solver`: how to solve the linear system at each step.
   - `BundleLinearSystemSolver.LSMR`: a solver based on warm-started conjugate gradient.
   - `BundleLinearSystemSolver.QR:` an exact solver based on a compact QR decomposition; see [[1]](#1) for details.
@@ -319,7 +330,7 @@ below `tol` at any given iteration. Upon termination, the function returns
 a list containing the cumulative number of calls to the autodifferentiation
 oracles as well as list containing the objective function value at each step.
 
-An example of using `superpolyak_coupled_with_fallback` is given in [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
+An example of using `superpolyak_coupled_with_fallback` is given in [SuperPolyakDemo.ipynb](examples/SuperPolyakDemo.ipynb).
 
 # References
 
