@@ -227,7 +227,8 @@ class LassoProblem:
         l1_penalty: Optional[float] = None,
     ):
         self.A = torch.tensor(
-            np.linalg.qr(np.random.randn(d, m))[0].T, dtype=torch.double
+            np.linalg.qr(np.random.randn(d, m))[0].T,
+            dtype=torch.double
             # replace this with a sparse random matrix
         )
         self.x = generate_sparse_vector(d, k)

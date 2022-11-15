@@ -3,22 +3,21 @@ from torch.optim.optimizer import Optimizer
 
 # Modified from https://github.com/pytorch/pytorch/blob/master/torch/optim/lbfgs.py
 
-class AlternatingProjections(Optimizer):
 
-    def __init__(self,
-                 params,
-                 projs
-                 ):
+class AlternatingProjections(Optimizer):
+    def __init__(self, params, projs):
         super(AlternatingProjections, self).__init__(params, dict())
 
         self.projs = projs
         if len(self.param_groups) != 1:
-            raise ValueError("Alternating projections doesn't support per-parameter options "
-                             "(parameter groups)")
-        self._params = self.param_groups[0]['params']
+            raise ValueError(
+                "Alternating projections doesn't support per-parameter options "
+                "(parameter groups)"
+            )
+        self._params = self.param_groups[0]["params"]
 
     @torch.no_grad()
-    def step(self, closure = None):
+    def step(self, closure=None):
         """Performs a single alternating projections step.
 
         Arguments:

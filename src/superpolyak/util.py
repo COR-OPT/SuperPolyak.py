@@ -60,6 +60,7 @@ def superpolyak_coupled_with_fallback(
         loss_list (Sequence[float]): A list containing the loss function value
             at each step of the algorithm.
     """
+
     def _get_metric_msg():
         return f", Metric = {metric_to_print()}" if metric_to_print is not None else ""
 
