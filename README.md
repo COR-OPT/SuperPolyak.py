@@ -85,6 +85,7 @@ $$
 \text{Find a root of } f(x) = \|\nabla l(x)\|.
 $$
 
+Now let's do a quick experiment:
 - **Setup:**
   - We fit a logistic regression model with l2 regularization to Gaussian data.
   - We vary the dimension $d$ and fix the number of parameters $m$.
