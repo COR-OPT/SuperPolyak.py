@@ -10,7 +10,14 @@ where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative 
 
 SuperPolyak is an unusual first-order method in that when certain **minimal assumptions** are met, it locally converges **superlinearly** (i.e., "double exponentially").
 
-**Installation**:
+# Installation
+Currently, the only way to install `SuperPolyak` is to `git clone` this repository and install it (via `pip` or `conda`). We will make it available via PyPI soon.
+
+## Example installation using `pip`
+```shell
+$ git clone https://VHarisop/SuperPolyak.py.git
+$ python -m pip install -e .
+```
 
 **Quick demo:** [SuperPolyakDemo.ipynb](examples/SuperPolyakDemo.ipynb).
 
@@ -31,14 +38,7 @@ SuperPolyak is an unusual first-order method in that when certain **minimal assu
   - [Coupling with a fallback algorithm (e.g. SGD)](#coupling-with-a-fallback-algorithm-eg-sgd)
 - [References](#references)
 
-# Installation
-Currently, the only way to install `SuperPolyak` is to `git clone` this repository and install it (via `pip` or `conda`). We will make it available via PyPI soon.
 
-## Example installation using `pip`
-```shell
-$ git clone https://VHarisop/SuperPolyak.py.git
-$ python -m pip install -e .
-```
 
 # Two quick examples
 
