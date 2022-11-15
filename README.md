@@ -1,16 +1,23 @@
 # Superpolyak.py
 
-A pytorch implementation of the SuperPolyak subgradient method [[1]](#1).
+A pytorch implementation of the SuperPolyak subgradient method [[1]](#1). SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
+
+$$
+f(\bar x) = 0 \qquad \iff \qquad  \min f(x)
+$$
+
+where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$. 
+
+SuperPolyak is an unusual first-order method in that when certain **minimal assumptions** are met, it locally converges **superlinearly** (i.e., "double exponentially").
 
 **Quick demo:** [SuperPolyakDemo.ipynb](SuperPolyakDemo.ipynb).
 
-Outline
-- [What is SuperPolyak?](#what-is-superpolyak)
-  - [Problem formulation](#problem-formulation)
-    - [Example 1: Fitting a 1-hidden layer neural network with max-pooling](#example-1-fitting-a-1-hidden-layer-neural-network-with-max-pooling)
-    - [Example 2: Solving a smooth and strongly convex optimization problem](#example-2-solving-a-smooth-and-strongly-convex-optimization-problem)
+**Outline:**
+- [Two Quick Exmaples](#two-quick-examples)
+  - [Example 1: Fitting a 1-hidden layer neural network with max-pooling](#example-1-fitting-a-1-hidden-layer-neural-network-with-max-pooling)
+  - [Example 2: Solving a smooth and strongly convex optimization problem](#example-2-solving-a-smooth-and-strongly-convex-optimization-problem)
 - [What is SuperPolyak doing?](#what-is-superpolyak-doing)
-  - [Newton's method](#newtons-method)
+  - [Inspiration: Newton's method](#inspiration-newtons-method)
   - [Slow-down of Newton's method in higher dimensions](#slow-down-of-newtons-method-in-higher-dimensions)
   - [The SuperPolyak step: a method for repairing Newton's method in higher dimensions](#the-superpolyak-step-a-method-for-repairing-newtons-method-in-higher-dimensions)
   - [Practical improvements: early termination of the SuperPolyak step](#practical-improvements-early-termination-of-the-superpolyak-step)
@@ -22,21 +29,9 @@ Outline
   - [Coupling with a fallback algorithm (e.g. SGD)](#coupling-with-a-fallback-algorithm-eg-sgd)
 - [References](#references)
 
-# What is SuperPolyak?
+# Two quick examples
 
-## Problem formulation and motivation
-SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
-
-$$
-f(\bar x) = 0 \qquad \iff \qquad  \min f(x)
-$$
-
-where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$. 
-
-SuperPolyak is an unusual first-order method in that when certain **minimal assumptions** are met, it locally converges **superlinearly** (i.e., "double exponentially"). Let's see a couple quick examples demonstrating this.
-
-
-### Example 1: Fitting a 1-hidden layer neural network with max-pooling
+## Example 1: Fitting a 1-hidden layer neural network with max-pooling
 
 
 Let's try to fit a simple neural network with max-pooling to data
@@ -67,7 +62,7 @@ Now let's do a quick experiment:
 
 ![Performance Plot](figures/max_linear_regression.png)
 
-### Example 2: Solving a smooth and strongly convex optimization problem
+## Example 2: Solving a smooth and strongly convex optimization problem
 
 Let's try to solve the following optimization problem:
 
@@ -106,13 +101,13 @@ d	SuperPolyak time (s)	NewtonCG time (s)
 100000	3.3524928092956543	4.931229829788208
 ```
 
-**Note:** we tried to use [existing implementations of NewtonCG](https://github.com/rfeinman/pytorch-minimize), but for the scale of problems considered here, we could not decrease the norm of the gradient to machine tolerance. Thus, we implemented our own version of NewtonCG; it performs on par with existing implementations.
+**Note:** we tried to use [existing implementations of NewtonCG](https://github.com/rfeinman/pytorch-minimize), but for the scale of problems considered here, we could not decrease the norm of the gradient to machine tolerance. Thus, [we implemented our own version of NewtonCG](newtoncg.py); it performs on par with existing implementations.
 
 # What is SuperPolyak doing?
 
 SuperPolyak is inspired by _Newton's method_, which is taught in first-year calculus.
 
-## Newton's method
+## Inspiration: Newton's method
 Newton's method attempts to find the root of a single-variable function by repeatedly applying the following two steps:
 
 - Construct the tangent approximation of $f$ at the current iterate
