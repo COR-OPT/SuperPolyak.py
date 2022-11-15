@@ -324,4 +324,4 @@ An example of using `superpolyak_coupled_with_fallback` is given in [SuperPolyak
 
 [^semismooth]: This story is somewhat subtle. One could of course reformulate the problem to finding a root of the **smooth** mapping $F(x,y) = (x,2y)$ and apply the standard Newton method, which would converge superlinearly. However, our goal is to treat the loss function $f(x) = \|(x, 2y)\|$ as a blackbox, accessible only through gradient and function evaluations. Under this setting, Newton's method only converges linearly.
 
-[^subregularity]: To the best of our knowledge, without assuming further smoothness properties, superlinear convergence semismooth Newton methods must assume the Jacobian is injective. In contrast, SuperPolyak requires the mapping to be metrically subregular, a weaker property in general.
+[^subregularity]: To the best of our knowledge, without assuming further smoothness properties, existing results on superlinear convergence of semismooth Newton methods require the Jacobian to be injective. In contrast, SuperPolyak requires the mapping to be metrically subregular, a weaker property in general.
