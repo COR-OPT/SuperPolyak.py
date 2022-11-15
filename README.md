@@ -175,7 +175,7 @@ There are infinitely many ways to choose the "several distinct tangent approxima
 
 Instead of random, we suggest the following iterative scheme (here $g$ is a "gradient of $f$", e.g., the output of autodifferentiation):
 
-![SuperPolyak explnanation](figures/SuperPolyak_alg_explanation.gif)
+![SuperPolyak explanation](figures/SuperPolyak_alg_explanation.gif)
 
 Let's take a look at the algorithm in action:
 
