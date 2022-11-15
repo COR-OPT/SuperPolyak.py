@@ -85,17 +85,25 @@ $$
 \text{Find a root of } f(x) = \|\nabla l(x)\|.
 $$
 
-**TODO:** Vas please make a pretty plot like the above for logistic regression.
-
-**TODO** Need newton's method
-
 - **Setup:**
   - We fit a logistic regression model with l2 regularization to Gaussian data.
-  - We vary the dimension $d$ and the number of parameters $m$.
-  - We run SuperPolyak, gradient descent, and Newton's method.
+  - We vary the dimension $d$ and fix the number of parameters $m$.
+  - We run SuperPolyak and Newton's method, where the linear system is solved with a conjugate gradient method.
 - **Conclusion:**
-  - Superpolyak outperforms both methods both in terms of time and oracle calls (evals of $f$ and its gradient)?
+  - Superpolyak offers comparable performance to NewtonCG: 
+    - The number of oraclein terms of time and oracle calls is slightly higher; 
+    - The time is time is slightly lower.
 
+![SuperPolyak VS NewtonCG](figures/SuperPolyakVSNewtonCG.png) 
+```
+d	SuperPolyak time (s)	NewtonCG time (s)
+-------------------------------------------------
+1000	0.023495912551879883	0.05375099182128906
+10000	0.38303589820861816	0.6963608264923096
+100000	3.3524928092956543	4.931229829788208
+```
+
+**Note:** we tried to use [existing implementations of NewtonCG](https://github.com/rfeinman/pytorch-minimize), but for the scale of problems considered here, we could not decrease the norm of the gradient to machine tolerance. Thus, we implemented our own version of NewtonCG; it performs on par with existing implementations.
 
 # What is SuperPolyak doing?
 
