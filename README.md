@@ -24,14 +24,16 @@ Outline
 
 # What is SuperPolyak?
 
-## Problem formulation
+## Problem formulation and motivation
 SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
 
 $$
 f(\bar x) = 0 \qquad \iff \qquad  \min f(x)
 $$
 
-where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$. When certain **minimal assumptions** are met, SuperPolyak locally converges **superlinearly** (i.e., "double exponentially").
+where $f \colon \mathbb{R}^d \rightarrow \mathbb{R_{\geq 0}}$ is a _nonnegative function_ with minimal value $0$. 
+
+SuperPolyak is an unusual first-order method in that when certain **minimal assumptions** are met, it locally converges **superlinearly** (i.e., "double exponentially"). Let's see a couple quick examples demonstrating this.
 
 
 ### Example 1: Fitting a 1-hidden layer neural network with max-pooling
