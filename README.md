@@ -1,6 +1,6 @@
 # Superpolyak.py
 
-A pytorch implementation of the SuperPolyak subgradient method [[1]](#1). SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
+Superpolyak.py is a pytorch implementation of the SuperPolyak subgradient method [[1]](#1). SuperPolyak is a **first-order** method for solving (possibly) nonsmooth equations/optimization problems of the form:
 
 $$
 f(\bar x) = 0 \qquad \iff \qquad  \min f(x)
