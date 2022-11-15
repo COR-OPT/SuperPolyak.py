@@ -91,8 +91,8 @@ $$
   - We run SuperPolyak and Newton's method, where the linear system is solved with a conjugate gradient method.
 - **Conclusion:**
   - Superpolyak offers comparable performance to NewtonCG: 
-    - The number of oraclein terms of time and oracle calls is slightly higher; 
-    - The time is time is slightly lower.
+    - SuperPolyak used slightly more oracle calls; 
+    - SuperPolyak took slightly less time.
 
 ![SuperPolyak VS NewtonCG](figures/SuperPolyakVSNewtonCG.png) 
 ```
