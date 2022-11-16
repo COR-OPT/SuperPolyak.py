@@ -15,7 +15,7 @@ Currently, the only way to install `SuperPolyak` is to `git clone` this reposito
 
 ## Example installation using `pip`
 ```shell
-$ git clone https://github.com/VHarisop/SuperPolyak.py.git
+$ git clone https://github.com/COR-OPT/SuperPolyak.py.git
 $ python -m pip install -e .
 ```
 
